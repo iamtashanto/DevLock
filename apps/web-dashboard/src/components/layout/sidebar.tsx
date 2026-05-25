@@ -18,7 +18,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { can } = usePermissions();
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
   };
 
@@ -59,13 +59,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {!collapsed && (
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-lg font-bold">DevLock</span>
           </Link>
         )}
         {collapsed && (
-          <Link href="/" className="mx-auto">
+          <Link href="/dashboard" className="mx-auto">
             <Shield className="h-6 w-6 text-primary" />
           </Link>
         )}

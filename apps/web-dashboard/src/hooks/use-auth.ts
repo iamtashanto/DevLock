@@ -14,7 +14,7 @@ export function useAuth() {
     async (data: LoginRequest) => {
       const response = await authService.login(data);
       setAuth(response.accessToken, response.user);
-      router.push('/');
+      router.push('/dashboard');
       return response;
     },
     [setAuth, router]
@@ -24,7 +24,7 @@ export function useAuth() {
     async (data: RegisterRequest) => {
       const response = await authService.register(data);
       setAuth(response.accessToken, response.user);
-      router.push('/');
+      router.push('/dashboard');
       return response;
     },
     [setAuth, router]

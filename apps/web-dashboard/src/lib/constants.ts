@@ -52,7 +52,7 @@ export type NavItem = {
 export const MAIN_NAV_ITEMS: NavItem[] = [
   {
     title: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: LayoutDashboard,
   },
   {

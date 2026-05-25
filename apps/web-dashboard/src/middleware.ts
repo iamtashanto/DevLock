@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
+const PUBLIC_EXACT_PATHS = ['/'];
+const PUBLIC_PREFIX_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
 const STATIC_PREFIXES = ['/_next', '/api', '/static', '/favicon.ico'];
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((path) => pathname.startsWith(path));
+  if (PUBLIC_EXACT_PATHS.includes(pathname)) return true;
+  return PUBLIC_PREFIX_PATHS.some((path) => pathname.startsWith(path));
 }
 
 function isStaticPath(pathname: string): boolean {
@@ -36,10 +38,10 @@ export function middleware(request: NextRequest) {
 
   // Allow public paths
   if (isPublicPath(pathname)) {
-    // If user is already authenticated, redirect to dashboard
+    // If user is already authenticated on auth pages, redirect to dashboard
     const token = request.cookies.get('access_token')?.value;
-    if (token && !isTokenExpired(token)) {
-      return NextResponse.redirect(new URL('/', request.url));
+    if (token && !isTokenExpired(token) && pathname !== '/') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();
   }
