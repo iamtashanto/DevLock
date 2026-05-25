@@ -19,6 +19,23 @@ export function createRoutes(): Router {
   // Projects
   router.use('/projects/:projectId/licenses', authenticate, licenseRoutes);
 
+  // Analytics (global overview for dashboard home)
+  router.get('/analytics/overview', authenticate, (req, res) => {
+    res.json({
+      success: true,
+      data: {
+        totalProjects: 0,
+        totalLicenses: 0,
+        activeLicenses: 0,
+        expiredLicenses: 0,
+        suspendedLicenses: 0,
+        activeDevices: 0,
+        validationsToday: 0,
+        totalValidations: 0,
+      },
+    });
+  });
+
   // Placeholder routes for other modules
   router.get('/projects', authenticate, authorize('project:read'), (_req, res) => {
     res.json({ success: true, data: [], meta: { total: 0 } });

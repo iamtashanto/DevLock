@@ -1,58 +1,23 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_EXACT_PATHS = ['/'];
-const PUBLIC_PREFIX_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
-const STATIC_PREFIXES = ['/_next', '/api', '/static', '/favicon.ico'];
-
-function isPublicPath(pathname: string): boolean {
-  if (PUBLIC_EXACT_PATHS.includes(pathname)) return true;
-  return PUBLIC_PREFIX_PATHS.some((path) => pathname.startsWith(path));
-}
-
-function isStaticPath(pathname: string): boolean {
-  return STATIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
-function isTokenExpired(token: string): boolean {
-  try {
-    const payload = token.split('.')[1];
-    if (!payload) return true;
-    const decoded = JSON.parse(atob(payload));
-    const exp = decoded.exp;
-    if (!exp) return true;
-    // Add 30s buffer
-    return Date.now() >= exp * 1000 - 30000;
-  } catch {
-    return true;
-  }
-}
-
+/**
+ * Middleware only handles:
+ * 1. Redirecting authenticated users away from auth pages (if cookie exists)
+ * 2. All other auth is handled client-side via useAuth hook + Zustand store
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow static files and API routes
-  if (isStaticPath(pathname)) {
+  // Skip static files
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/static') ||
+    pathname.includes('favicon.ico') ||
+    pathname.includes('.')
+  ) {
     return NextResponse.next();
-  }
-
-  // Allow public paths
-  if (isPublicPath(pathname)) {
-    // If user is already authenticated on auth pages, redirect to dashboard
-    const token = request.cookies.get('access_token')?.value;
-    if (token && !isTokenExpired(token) && pathname !== '/') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Check for access token
-  const token = request.cookies.get('access_token')?.value;
-
-  if (!token || isTokenExpired(token)) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

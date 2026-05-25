@@ -23,39 +23,61 @@ interface RefreshResponse {
   accessToken: string;
 }
 
+function decodeJwtPayload(token: string): Record<string, any> {
+  const parts = token.split('.');
+  const payload = parts[1] ?? '';
+  return JSON.parse(atob(payload));
+}
+
 export const authService = {
   async login(data: LoginRequest): Promise<{ accessToken: string; user: User }> {
     const response = await apiClient.post<AuthResponse>('/auth/login', data);
-    // Store token temporarily to fetch user profile
+    // Store token to make subsequent requests work
     localStorage.setItem('access_token', response.accessToken);
-    const user = await apiClient.get<any>('/auth/me');
-    return {
-      accessToken: response.accessToken,
-      user: {
-        id: user.userId,
-        name: '', // Will be fetched properly later
-        email: data.email,
-        role: user.role,
-        orgId: user.orgId,
-        permissions: user.permissions,
-      },
-    };
+    try {
+      const me = await apiClient.get<any>('/auth/me');
+      return {
+        accessToken: response.accessToken,
+        user: {
+          id: me.userId,
+          name: me.name || (data.email.split('@')[0] || data.email),
+          email: data.email,
+          role: me.role,
+          orgId: me.orgId,
+          permissions: me.permissions || [],
+        },
+      };
+    } catch {
+      // If /me fails, construct user from JWT payload
+      const payload = decodeJwtPayload(response.accessToken);
+      return {
+        accessToken: response.accessToken,
+        user: {
+          id: payload.sub,
+          name: (data.email.split('@')[0] || data.email),
+          email: data.email,
+          role: payload.role,
+          orgId: payload.orgId,
+          permissions: payload.permissions || [],
+        },
+      };
+    }
   },
 
   async register(data: RegisterRequest): Promise<{ accessToken: string; user: User }> {
     const response = await apiClient.post<AuthResponse>('/auth/register', data);
-    // Store token temporarily to fetch user profile
+    // Decode user info from JWT (no need to call /me)
+    const payload = decodeJwtPayload(response.accessToken);
     localStorage.setItem('access_token', response.accessToken);
-    const user = await apiClient.get<any>('/auth/me');
     return {
       accessToken: response.accessToken,
       user: {
-        id: user.userId,
+        id: payload.sub,
         name: data.name,
         email: data.email,
-        role: user.role,
-        orgId: user.orgId,
-        permissions: user.permissions,
+        role: payload.role,
+        orgId: payload.orgId,
+        permissions: payload.permissions || [],
       },
     };
   },
