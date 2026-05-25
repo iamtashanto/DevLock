@@ -1,6 +1,6 @@
 {
   "name": "devlock-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "DevLock Backend SDK — License enforcement, remote management, and developer protection for Node.js applications",
   "author": "DevLock",
   "license": "MIT",
@@ -65,5 +65,14 @@
     "ioredis": { "optional": true }
   },
   "keywords": ["devlock", "sdk", "licensing", "node", "express", "fastify", "nestjs", "middleware", "feature-flags"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock",
+    "directory": "packages/backend-sdk"
+  },
+  "homepage": "https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/backend-sdk",
+  "bugs": {
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock/issues"
+  },
   "sideEffects": false
 }

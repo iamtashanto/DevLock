@@ -1,6 +1,6 @@
 {
   "name": "devlock-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "DevLock Frontend SDK — License enforcement, remote management, and developer protection for web applications",
   "author": "DevLock",
   "license": "MIT",
@@ -78,8 +78,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/devlock/devlock",
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock",
     "directory": "packages/frontend-sdk"
+  },
+  "homepage": "https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/frontend-sdk",
+  "bugs": {
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock/issues"
   },
   "sideEffects": false
 }
