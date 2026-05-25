@@ -19,6 +19,10 @@ export interface AuthResponse {
   expiresIn: number;
 }
 
+interface RefreshResponse {
+  accessToken: string;
+}
+
 export const authService = {
   async login(data: LoginRequest): Promise<{ accessToken: string; user: User }> {
     const response = await apiClient.post<AuthResponse>('/auth/login', data);
