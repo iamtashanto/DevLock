@@ -63,7 +63,7 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
   },
   {
     title: 'Analytics',
-    href: '/analytics',
+    href: '/projects',
     icon: BarChart3,
     permission: 'analytics:read',
   },
