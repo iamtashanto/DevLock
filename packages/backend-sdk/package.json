@@ -1,5 +1,5 @@
 {
-  "name": "@devlock/node",
+  "name": "devlock-sdk",
   "version": "1.0.0",
   "description": "DevLock Backend SDK — License enforcement, remote management, and developer protection for Node.js applications",
   "author": "DevLock",

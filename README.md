@@ -60,8 +60,8 @@ devlock/
 │   ├── config/                 → Env config with Zod validation
 │   ├── encryption/             → AES-256, Ed25519, HMAC, password hashing
 │   ├── ui/                     → React component library (Tailwind + CVA)
-│   ├── frontend-sdk/           → Browser SDK for client apps
-│   ├── backend-sdk/            → Node.js SDK with Express middleware
+│   ├── frontend-sdk/           → Browser SDK (npm: devlock-client)
+│   ├── backend-sdk/            → Node.js SDK (npm: devlock-sdk)
 │   ├── eslint-config/          → Shared ESLint configs
 │   └── tsconfig/               → Shared TypeScript configs
 │
@@ -152,18 +152,18 @@ pnpm dev
 ### Frontend SDK (Browser)
 
 ```bash
-npm install @devlock/frontend-sdk
+npm install devlock-client
 ```
 
 ```typescript
-import { DevLockClient } from '@devlock/frontend-sdk';
+import { DevLock } from 'devlock-client';
 
-const devlock = new DevLockClient({
+const devlock = new DevLock({
   projectKey: 'pk_live_xxxxx',
   licenseKey: 'DLCK-XXXX-XXXX-XXXX-XXXX',
-  callbacks: {
-    onSuspended: (reason) => showBlockedUI(reason),
-    onMaintenance: (message) => showMaintenancePage(message),
+  on: {
+    onLicenseSuspended: (reason) => showBlockedUI(reason),
+    onMaintenanceMode: (message) => showMaintenancePage(message),
     onKillSwitch: (reason) => disableApp(reason),
     onNotification: (notif) => showToast(notif.message),
     onFeatureToggle: (flag, enabled) => updateUI(flag, enabled),
@@ -181,19 +181,21 @@ if (devlock.isFeatureEnabled('premium-charts')) {
 ### Backend SDK (Node.js / Express)
 
 ```bash
-npm install @devlock/backend-sdk
+npm install devlock-sdk
 ```
 
 ```typescript
-import { createExpressMiddleware } from '@devlock/backend-sdk/express';
+import { createMiddleware } from 'devlock-sdk/express';
 
 // Protect all routes with license validation
-app.use(createExpressMiddleware({
+app.use(createMiddleware({
   secretKey: process.env.DEVLOCK_SECRET_KEY,
   projectId: process.env.DEVLOCK_PROJECT_ID,
   excludePaths: ['/health', '/public'],
-  onKillSwitch: (reason) => {
-    console.error('Kill switch activated:', reason);
+  on: {
+    onKillSwitch: (reason) => {
+      console.error('Kill switch activated:', reason);
+    },
   },
 }));
 
