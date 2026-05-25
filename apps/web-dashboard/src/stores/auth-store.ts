@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type UserRole = 'owner' | 'admin' | 'developer' | 'viewer' | 'billing';
 
@@ -16,11 +16,13 @@ export interface User {
 interface AuthState {
   accessToken: string | null;
   user: User | null;
+  _hasHydrated: boolean;
   setAuth: (token: string, user: User) => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -28,6 +30,11 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       accessToken: null,
       user: null,
+      _hasHydrated: false,
+
+      setHasHydrated: (state: boolean) => {
+        set({ _hasHydrated: state });
+      },
 
       setAuth: (token: string, user: User) => {
         localStorage.setItem('access_token', token);
@@ -54,7 +61,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'devlock-auth',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ user: state.user, accessToken: state.accessToken }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
