@@ -1,6 +1,6 @@
 {
   "name": "devlock-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "DevLock Frontend SDK — License enforcement, remote management, and developer protection for web applications",
   "author": "DevLock",
   "license": "MIT",
