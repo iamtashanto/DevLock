@@ -1,3 +1,6 @@
+import { HeaderAuth } from '@/components/marketing/header-auth';
+import { PricingSection } from '@/components/marketing/pricing-section';
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -24,17 +27,7 @@ export default function LandingPage() {
               GitHub
             </a>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/login" className="hidden text-sm text-slate-300 transition hover:text-white sm:inline-block">
-              Sign In
-            </a>
-            <a
-              href="/register"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-            >
-              Get Started
-            </a>
-          </div>
+          <HeaderAuth />
         </nav>
       </header>
 
@@ -523,114 +516,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 lg:grid-cols-3">
-              {/* Free Tier */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
-                <h3 className="text-lg font-semibold text-white">Free</h3>
-                <p className="mt-2 text-sm text-slate-400">Perfect for side projects and testing.</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-white">$0</span>
-                  <span className="text-slate-500">/month</span>
-                </div>
-                <ul className="mt-8 space-y-3">
-                  {[
-                    '2 projects',
-                    '50 licenses per project',
-                    'Basic license validation',
-                    'Domain locking',
-                    'Community support',
-                    '1K API requests/day',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm text-slate-300">
-                      <svg className="h-4 w-4 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="/register"
-                  className="mt-8 block w-full rounded-lg border border-slate-700 bg-slate-800 py-3 text-center text-sm font-medium text-white transition hover:bg-slate-700"
-                >
-                  Get Started Free
-                </a>
-              </div>
-
-              {/* Pro Tier */}
-              <div className="relative rounded-2xl border border-indigo-500/50 bg-slate-900/80 p-8 shadow-lg shadow-indigo-500/10">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-4 py-1 text-xs font-medium text-white">
-                  Most Popular
-                </div>
-                <h3 className="text-lg font-semibold text-white">Pro</h3>
-                <p className="mt-2 text-sm text-slate-400">For professional developers and small teams.</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-white">$29</span>
-                  <span className="text-slate-500">/month</span>
-                </div>
-                <ul className="mt-8 space-y-3">
-                  {[
-                    '10 projects',
-                    '1,000 licenses per project',
-                    'Kill-switch & maintenance mode',
-                    'Feature flags',
-                    'Real-time WebSocket updates',
-                    'Tamper detection',
-                    'Webhook notifications',
-                    'Priority email support',
-                    '100K API requests/day',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm text-slate-300">
-                      <svg className="h-4 w-4 shrink-0 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="/register"
-                  className="mt-8 block w-full rounded-lg bg-indigo-600 py-3 text-center text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500"
-                >
-                  Start Pro Trial
-                </a>
-              </div>
-
-              {/* Enterprise Tier */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
-                <h3 className="text-lg font-semibold text-white">Enterprise</h3>
-                <p className="mt-2 text-sm text-slate-400">For organizations with advanced needs.</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-white">Custom</span>
-                </div>
-                <ul className="mt-8 space-y-3">
-                  {[
-                    'Unlimited projects',
-                    'Unlimited licenses',
-                    'SSO / SAML integration',
-                    'Custom SLA (99.99%)',
-                    'Dedicated account manager',
-                    'On-premise deployment option',
-                    'Audit logs & compliance',
-                    'Custom integrations',
-                    'Unlimited API requests',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm text-slate-300">
-                      <svg className="h-4 w-4 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="mailto:enterprise@devlock.io"
-                  className="mt-8 block w-full rounded-lg border border-slate-700 bg-slate-800 py-3 text-center text-sm font-medium text-white transition hover:bg-slate-700"
-                >
-                  Contact Sales
-                </a>
-              </div>
-            </div>
+            <PricingSection />
           </div>
         </section>
 
@@ -895,10 +781,9 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-
           <div className="mt-12 border-t border-slate-800 pt-8">
             <p className="text-center text-sm text-slate-500">
-              &copy; {new Date().getFullYear()} DevLock. Open source under MIT License.
+              Developed with ❤️ by <a href="https://tashanto.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300">tashanto.com</a>
             </p>
           </div>
         </div>

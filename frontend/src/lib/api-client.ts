@@ -77,9 +77,9 @@ class ApiClient {
     });
 
     if (response.status === 401) {
-      localStorage.removeItem('access_token');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        // Do not force logout aggressively, just throw ApiError. 
+        // The dashboard layout or specific components will handle redirects.
       }
       throw new ApiError(401, 'Unauthorized', 'UNAUTHORIZED');
     }
