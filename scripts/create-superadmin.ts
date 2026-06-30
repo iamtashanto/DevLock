@@ -13,7 +13,8 @@ async function main() {
   }
 
   try {
-    await connectMongo();
+    const mongoUri = process.env.MONGODB_URI?.replace('?replicaSet=rs0', '') || 'mongodb://localhost:27017/devlock';
+    await connectMongo(mongoUri);
     console.log('Connected to MongoDB.');
 
     let user = await UserModel.findOne({ email: email.toLowerCase() });
