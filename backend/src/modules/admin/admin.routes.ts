@@ -33,4 +33,24 @@ router.post('/tenants/:tenantId/plan', (req, res, next) => {
   controller.updateTenantPlan(req, res).catch(next);
 });
 
+router.get('/status', (req, res, next) => {
+  controller.getSystemStatus(req, res).catch(next);
+});
+
+router.get('/plans', (req, res, next) => {
+  controller.getPlans(req, res).catch(next);
+});
+
+router.post('/plans', (req, res, next) => {
+  controller.createPlan(req, res).catch(next);
+});
+
+router.put('/plans/:id', (req, res, next) => {
+  controller.updatePlan(req, res).catch(next);
+});
+
+router.delete('/plans/:id', (req, res, next) => {
+  controller.deletePlan(req, res).catch(next);
+});
+
 export { router as adminRoutes };

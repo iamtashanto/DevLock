@@ -3,7 +3,7 @@ import mongoose, { Schema, type Document } from 'mongoose';
 export interface ITenantDocument extends Document {
   name: string;
   slug: string;
-  plan: 'free' | 'pro' | 'business' | 'enterprise';
+  plan: 'free' | 'starter' | 'pro' | 'business' | 'enterprise';
   owner: mongoose.Types.ObjectId;
   settings: {
     customDomain?: string;
@@ -23,7 +23,7 @@ const tenantSchema = new Schema<ITenantDocument>(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    plan: { type: String, enum: ['free', 'pro', 'business', 'enterprise'], default: 'free' },
+    plan: { type: String, enum: ['free', 'starter', 'pro', 'business', 'enterprise'], default: 'free' },
     owner: { type: Schema.Types.ObjectId, ref: 'User' },
     settings: {
       customDomain: String,

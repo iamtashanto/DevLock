@@ -47,13 +47,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex h-16 items-center justify-between border-b border-border px-4">
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-red-500" />
-              <span className="text-lg font-bold text-red-500">Super Admin</span>
+              <Shield className="h-6 w-6 text-indigo-500" />
+              <span className="text-lg font-bold text-indigo-500">Super Admin</span>
             </div>
           )}
           {collapsed && (
             <div className="mx-auto">
-              <Shield className="h-6 w-6 text-red-500" />
+              <Shield className="h-6 w-6 text-indigo-500" />
             </div>
           )}
         </div>
@@ -64,21 +64,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive('/superadmin') && pathname === '/superadmin'
-                ? 'bg-red-500/10 text-red-400'
+                ? 'bg-indigo-500/10 text-indigo-400'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               collapsed && 'justify-center px-2'
             )}
-            title={collapsed ? 'Payments' : undefined}
+            title={collapsed ? 'Dashboard & Payments' : undefined}
           >
             <LayoutDashboard className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>Payments</span>}
+            {!collapsed && <span>Dashboard & Payments</span>}
           </Link>
           <Link
             href="/superadmin/tenants"
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive('/superadmin/tenants')
-                ? 'bg-red-500/10 text-red-400'
+                ? 'bg-indigo-500/10 text-indigo-400'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               collapsed && 'justify-center px-2'
             )}
@@ -86,6 +86,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Users className="h-5 w-5 shrink-0" />
             {!collapsed && <span>Tenants & Subs</span>}
+          </Link>
+          <Link
+            href="/superadmin/pricing"
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive('/superadmin/pricing')
+                ? 'bg-indigo-500/10 text-indigo-400'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              collapsed && 'justify-center px-2'
+            )}
+            title={collapsed ? 'Dynamic Pricing' : undefined}
+          >
+            <Shield className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Dynamic Pricing</span>}
           </Link>
         </nav>
 

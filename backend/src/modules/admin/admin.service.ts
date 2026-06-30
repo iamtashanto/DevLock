@@ -67,4 +67,47 @@ export class AdminService {
 
     return tenant;
   }
+
+  async getSystemStatus() {
+    const dbState = mongoose.connection.readyState;
+    let dbStatus = 'disconnected';
+    if (dbState === 1) dbStatus = 'connected';
+    else if (dbState === 2) dbStatus = 'connecting';
+    else if (dbState === 3) dbStatus = 'disconnecting';
+
+    return {
+      database: dbStatus,
+      apiGateway: 'online',
+      version: '1.0.0',
+      uptime: process.uptime(),
+      timestamp: new Date()
+    };
+  }
+
+  async getPlans() {
+    // dynamically import PlanModel to avoid circular deps if any, or just import it at top
+    const { PlanModel } = await import('@/database');
+    return PlanModel.find().sort({ price: 1 }).lean();
+  }
+
+  async createPlan(data: any) {
+    const { PlanModel } = await import('@/database');
+    const plan = new PlanModel(data);
+    await plan.save();
+    return plan;
+  }
+
+  async updatePlan(id: string, data: any) {
+    const { PlanModel } = await import('@/database');
+    const plan = await PlanModel.findByIdAndUpdate(id, data, { new: true });
+    if (!plan) throw new Error('Plan not found');
+    return plan;
+  }
+
+  async deletePlan(id: string) {
+    const { PlanModel } = await import('@/database');
+    const plan = await PlanModel.findByIdAndDelete(id);
+    if (!plan) throw new Error('Plan not found');
+    return { success: true };
+  }
 }
