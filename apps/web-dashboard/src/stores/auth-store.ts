@@ -11,6 +11,7 @@ export interface User {
   orgId: string;
   permissions: string[];
   avatarUrl?: string;
+  isSuperAdmin?: boolean;
 }
 
 interface AuthState {

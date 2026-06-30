@@ -4,6 +4,8 @@ import { licenseRoutes } from '../modules/licenses/license.routes.js';
 import { sdkRoutes } from '../modules/sdk/sdk.routes.js';
 import { projectRoutes } from '../modules/projects/project.routes.js';
 import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
+import { adminRoutes } from '../modules/admin/admin.routes.js';
+import { billingRoutes } from '../modules/billing/billing.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 
@@ -55,7 +57,12 @@ export function createRoutes(): Router {
     res.json({ success: true, data: [], meta: { total: 0 } });
   });
 
+  // Admin
+  router.use('/admin', adminRoutes);
+
   // Billing
+  router.use('/billing', billingRoutes);
+  
   router.get('/billing/subscription', authenticate, authorize('org:manage_billing'), (_req, res) => {
     res.json({ success: true, data: { plan: 'free' } });
   });

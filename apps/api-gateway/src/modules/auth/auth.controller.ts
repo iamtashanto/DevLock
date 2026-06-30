@@ -45,6 +45,9 @@ export class AuthController {
   }
 
   async me(req: Request, res: Response): Promise<void> {
+    const { UserModel } = await import('@devlock/database');
+    const user = await UserModel.findById(req.auth!.sub).lean();
+
     res.json({
       success: true,
       data: {
@@ -52,6 +55,7 @@ export class AuthController {
         orgId: req.auth!.orgId,
         role: req.auth!.role,
         permissions: req.auth!.permissions,
+        isSuperAdmin: user?.isSuperAdmin || false,
       },
     });
   }

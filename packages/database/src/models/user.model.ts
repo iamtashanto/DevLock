@@ -9,6 +9,7 @@ export interface IUserDocument extends Document {
   mfa: { enabled: boolean; secret?: string; backupCodes?: string[] };
   emailVerifiedAt?: Date;
   lastLoginAt?: Date;
+  isSuperAdmin?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,7 @@ const userSchema = new Schema<IUserDocument>(
     },
     emailVerifiedAt: Date,
     lastLoginAt: Date,
+    isSuperAdmin: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
