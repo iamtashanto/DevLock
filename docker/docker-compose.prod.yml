@@ -5,8 +5,8 @@ services:
   mongodb:
     image: mongo:7
     container_name: devlock-mongo
-    ports: ['27017:27017']
-    volumes: ['./volumes/mongo:/data/db']
+    restart: always
+    volumes: ['mongo_data:/data/db']
     command: ['--replSet', 'rs0', '--bind_ip_all']
     healthcheck:
       test:
@@ -23,9 +23,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: devlock-redis
-    ports: ['6379:6379']
+    restart: always
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes: ['./volumes/redis:/data']
+    volumes: ['redis_data:/data']
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -38,9 +38,12 @@ services:
       context: ..
       dockerfile: apps/api-gateway/Dockerfile
     container_name: devlock-api
+    restart: always
+    # Mapping to 3001 on the host to avoid conflicting with your existing Next.js app on 3000
     ports: ['3001:3000']
     env_file: ../.env
     environment:
+      - NODE_ENV=production
       - PORT=3000
       - MONGODB_URI=mongodb://mongodb:27017/devlock?replicaSet=rs0
       - REDIS_URL=redis://redis:6379
@@ -53,8 +56,10 @@ services:
       context: ..
       dockerfile: apps/auth-service/Dockerfile
     container_name: devlock-auth
+    restart: always
     env_file: ../.env
     environment:
+      - NODE_ENV=production
       - PORT=3001
       - MONGODB_URI=mongodb://mongodb:27017/devlock?replicaSet=rs0
       - REDIS_URL=redis://redis:6379
@@ -67,8 +72,10 @@ services:
       context: ..
       dockerfile: apps/license-service/Dockerfile
     container_name: devlock-license
+    restart: always
     env_file: ../.env
     environment:
+      - NODE_ENV=production
       - PORT=3002
       - MONGODB_URI=mongodb://mongodb:27017/devlock?replicaSet=rs0
       - REDIS_URL=redis://redis:6379
@@ -81,9 +88,11 @@ services:
       context: ..
       dockerfile: apps/websocket-service/Dockerfile
     container_name: devlock-ws
+    restart: always
     ports: ['3010:3010']
     env_file: ../.env
     environment:
+      - NODE_ENV=production
       - PORT=3010
       - REDIS_URL=redis://redis:6379
     depends_on:
@@ -94,8 +103,11 @@ services:
       context: ..
       dockerfile: apps/web-dashboard/Dockerfile
     container_name: devlock-dashboard
+    restart: always
     ports: ['4000:4000']
     env_file: ../.env
+    environment:
+      - NODE_ENV=production
     depends_on: [api-gateway]
 
 volumes:

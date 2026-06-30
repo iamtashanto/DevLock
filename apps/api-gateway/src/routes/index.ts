@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { authRoutes } from '../modules/auth/auth.routes.js';
 import { licenseRoutes } from '../modules/licenses/license.routes.js';
 import { sdkRoutes } from '../modules/sdk/sdk.routes.js';
+import { projectRoutes } from '../modules/projects/project.routes.js';
+import { analyticsRoutes } from '../modules/analytics/analytics.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 
@@ -17,32 +19,21 @@ export function createRoutes(): Router {
   // ── Protected routes (JWT auth) ────────────────────────────────────
 
   // Projects
+  router.use('/projects', projectRoutes);
+  // License routes are currently nested under projects manually for the old route:
   router.use('/projects/:projectId/licenses', authenticate, licenseRoutes);
 
-  // Analytics (global overview for dashboard home)
-  router.get('/analytics/overview', authenticate, (req, res) => {
-    res.json({
-      success: true,
-      data: {
-        totalProjects: 0,
-        totalLicenses: 0,
-        activeLicenses: 0,
-        expiredLicenses: 0,
-        suspendedLicenses: 0,
-        activeDevices: 0,
-        validationsToday: 0,
-        totalValidations: 0,
-      },
-    });
-  });
+  // Analytics
+  router.use('/analytics', analyticsRoutes);
 
-  // Placeholder routes for other modules
-  router.get('/projects', authenticate, authorize('project:read'), (_req, res) => {
-    res.json({ success: true, data: [], meta: { total: 0 } });
-  });
-
-  router.get('/organizations', authenticate, authorize('org:read'), (req, res) => {
-    res.json({ success: true, data: { orgId: req.auth!.orgId } });
+  router.get('/organizations', authenticate, authorize('org:read'), async (req, res, next) => {
+    try {
+      const { TenantModel } = await import('@devlock/database');
+      const tenant = await TenantModel.findById(req.auth!.orgId).lean();
+      res.json({ success: true, data: { orgId: req.auth!.orgId, name: tenant?.name, plan: tenant?.plan } });
+    } catch (err) {
+      next(err);
+    }
   });
 
   // Config & Commands
@@ -57,11 +48,6 @@ export function createRoutes(): Router {
   // Feature Flags
   router.get('/projects/:projectId/flags', authenticate, authorize('config:read'), (_req, res) => {
     res.json({ success: true, data: [] });
-  });
-
-  // Analytics
-  router.get('/projects/:projectId/analytics/overview', authenticate, authorize('analytics:read'), (_req, res) => {
-    res.json({ success: true, data: {} });
   });
 
   // Audit Logs
