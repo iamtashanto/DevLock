@@ -45,6 +45,7 @@ export const authService = {
           role: me.role,
           orgId: me.orgId,
           permissions: me.permissions || [],
+          isSuperAdmin: me.isSuperAdmin || false,
         },
       };
     } catch {
@@ -59,6 +60,7 @@ export const authService = {
           role: payload.role,
           orgId: payload.orgId,
           permissions: payload.permissions || [],
+          isSuperAdmin: false,
         },
       };
     }

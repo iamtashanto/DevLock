@@ -25,4 +25,12 @@ router.post('/payments/:paymentId/reject', (req, res, next) => {
   controller.rejectPayment(req, res).catch(next);
 });
 
+router.get('/tenants', (req, res, next) => {
+  controller.listTenants(req, res).catch(next);
+});
+
+router.post('/tenants/:tenantId/plan', (req, res, next) => {
+  controller.updateTenantPlan(req, res).catch(next);
+});
+
 export { router as adminRoutes };

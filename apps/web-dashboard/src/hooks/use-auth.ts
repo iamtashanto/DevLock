@@ -14,7 +14,11 @@ export function useAuth() {
     async (data: LoginRequest) => {
       const response = await authService.login(data);
       setAuth(response.accessToken, response.user);
-      router.push('/dashboard');
+      if (response.user.isSuperAdmin) {
+        router.push('/superadmin');
+      } else {
+        router.push('/dashboard');
+      }
     },
     [setAuth, router]
   );

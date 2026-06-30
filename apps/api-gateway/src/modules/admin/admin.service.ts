@@ -48,4 +48,23 @@ export class AdminService {
 
     return payment;
   }
+
+  async listTenants() {
+    return TenantModel.find()
+      .populate('owner', 'name email')
+      .sort({ createdAt: -1 })
+      .lean();
+  }
+
+  async updateTenantPlan(tenantId: string, plan: string) {
+    const tenant = await TenantModel.findById(tenantId);
+    if (!tenant) throw new Error('Tenant not found');
+
+    tenant.plan = plan as any;
+    tenant.billing = tenant.billing || {};
+    tenant.billing.paymentStatus = 'active';
+    await tenant.save();
+
+    return tenant;
+  }
 }

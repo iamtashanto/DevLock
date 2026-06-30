@@ -24,4 +24,14 @@ export class AdminController {
     const data = await adminService.rejectPayment(req.params['paymentId']!);
     res.json({ success: true, data });
   }
+
+  async listTenants(req: Request, res: Response): Promise<void> {
+    const data = await adminService.listTenants();
+    res.json({ success: true, data });
+  }
+
+  async updateTenantPlan(req: Request, res: Response): Promise<void> {
+    const data = await adminService.updateTenantPlan(req.params['tenantId']!, req.body.plan);
+    res.json({ success: true, data });
+  }
 }

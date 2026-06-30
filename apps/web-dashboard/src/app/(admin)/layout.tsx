@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, LayoutDashboard, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { Shield, LayoutDashboard, ChevronLeft, ChevronRight, LogOut, Users } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { UserMenu } from '@/components/layout/user-menu';
 import { cn } from '@/lib/utils';
@@ -63,15 +63,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             href="/superadmin"
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              isActive('/superadmin')
+              isActive('/superadmin') && pathname === '/superadmin'
                 ? 'bg-red-500/10 text-red-400'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               collapsed && 'justify-center px-2'
             )}
-            title={collapsed ? 'Dashboard' : undefined}
+            title={collapsed ? 'Payments' : undefined}
           >
             <LayoutDashboard className="h-5 w-5 shrink-0" />
             {!collapsed && <span>Payments</span>}
+          </Link>
+          <Link
+            href="/superadmin/tenants"
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive('/superadmin/tenants')
+                ? 'bg-red-500/10 text-red-400'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              collapsed && 'justify-center px-2'
+            )}
+            title={collapsed ? 'Tenants & Subs' : undefined}
+          >
+            <Users className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Tenants & Subs</span>}
           </Link>
         </nav>
 
