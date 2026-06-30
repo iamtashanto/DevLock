@@ -1,0 +1,78 @@
+{
+  "name": "devlock-sdk",
+  "version": "1.0.3",
+  "description": "DevLock Backend SDK — License enforcement, remote management, and developer protection for Node.js applications",
+  "author": "DevLock",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./express": {
+      "types": "./dist/express.d.ts",
+      "import": "./dist/express.js",
+      "require": "./dist/express.cjs"
+    },
+    "./fastify": {
+      "types": "./dist/fastify.d.ts",
+      "import": "./dist/fastify.js",
+      "require": "./dist/fastify.cjs"
+    },
+    "./nestjs": {
+      "types": "./dist/nestjs.d.ts",
+      "import": "./dist/nestjs.js",
+      "require": "./dist/nestjs.cjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/ --ext .ts",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.0"
+  },
+  "devDependencies": {
+    "@devlock/eslint-config": "workspace:*",
+    "@devlock/tsconfig": "workspace:*",
+    "@types/express": "^4.17.21",
+    "eslint": "^8.57.0",
+    "express": "^4.19.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0"
+  },
+  "peerDependencies": {
+    "express": "^4.17.0 || ^5.0.0",
+    "fastify": "^4.0.0 || ^5.0.0",
+    "@nestjs/common": "^10.0.0",
+    "ioredis": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": { "optional": true },
+    "fastify": { "optional": true },
+    "@nestjs/common": { "optional": true },
+    "ioredis": { "optional": true }
+  },
+  "keywords": ["devlock", "sdk", "licensing", "node", "express", "fastify", "nestjs", "middleware", "feature-flags"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock",
+    "directory": "packages/backend-sdk"
+  },
+  "homepage": "https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/backend-sdk",
+  "bugs": {
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock/issues"
+  },
+  "sideEffects": false
+}

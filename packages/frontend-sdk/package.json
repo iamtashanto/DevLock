@@ -1,0 +1,89 @@
+{
+  "name": "devlock-client",
+  "version": "1.0.3",
+  "description": "DevLock Frontend SDK — License enforcement, remote management, and developer protection for web applications",
+  "author": "DevLock",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js",
+      "require": "./dist/vue.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist .turbo",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/ --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.0"
+  },
+  "devDependencies": {
+    "@devlock/eslint-config": "workspace:*",
+    "@devlock/tsconfig": "workspace:*",
+    "@types/react": "^18.3.0",
+    "eslint": "^8.57.0",
+    "react": "^18.3.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0",
+    "vue": "^3.4.0"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "vue": { "optional": true }
+  },
+  "keywords": [
+    "devlock",
+    "sdk",
+    "licensing",
+    "license-management",
+    "feature-flags",
+    "remote-config",
+    "kill-switch",
+    "domain-locking",
+    "tamper-detection"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock",
+    "directory": "packages/frontend-sdk"
+  },
+  "homepage": "https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/frontend-sdk",
+  "bugs": {
+    "url": "https://github.com/mdtanvirahamedshanto/DevLock/issues"
+  },
+  "sideEffects": false
+}
