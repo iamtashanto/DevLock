@@ -29,12 +29,13 @@ app.disable('x-powered-by');
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
-  origin: process.env['CORS_ORIGINS']?.split(',') ?? '*',
+  origin: (_origin, cb) => cb(null, true),   // সব domain allow
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type', 'Authorization', 'X-Request-ID',
     'X-DevLock-Key', 'X-DevLock-Signature', 'X-DevLock-Timestamp',
+    'X-License-Key',
   ],
   exposedHeaders: ['X-Request-ID', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
   maxAge: 86400,
