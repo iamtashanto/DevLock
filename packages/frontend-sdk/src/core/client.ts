@@ -326,7 +326,21 @@ export class DevLock {
     this.state.killSwitch = cfg.killSwitch?.enabled === true
       ? cfg.killSwitch
       : { enabled: false };
-    this.state.notifications = Array.isArray(cfg.notifications) ? cfg.notifications : [];
+    const incomingNotifs = Array.isArray(cfg.notifications) ? cfg.notifications : [];
+    
+    // Emit new notifications
+    incomingNotifs.forEach((notif) => {
+      const exists = this.state.notifications.some(n => n.id === notif.id);
+      if (!exists) {
+        this.emitter.emit('notification:push', notif);
+      }
+    });
+
+    // Clean up removed notifications silently
+    this.state.notifications = this.state.notifications.filter(existing => 
+      incomingNotifs.some(n => n.id === existing.id)
+    );
+
     this.state.featureFlags = (cfg.featureFlags && typeof cfg.featureFlags === 'object')
       ? cfg.featureFlags
       : {};
