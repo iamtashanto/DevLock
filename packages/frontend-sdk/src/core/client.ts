@@ -8,6 +8,7 @@ import { CacheManager } from './cache.js';
 import { WebSocketManager } from './websocket.js';
 import { TamperDetector } from './tamper.js';
 import { WatermarkManager } from './watermark.js';
+import { OverlayManager } from './overlay.js';
 import { generateFingerprint } from './fingerprint.js';
 
 const SDK_VERSION = '1.0.0';
@@ -47,6 +48,7 @@ export class DevLock {
   private ws: WebSocketManager;
   private tamper: TamperDetector;
   private watermark: WatermarkManager;
+  private overlay: OverlayManager;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private fingerprint: string = '';
   private telemetryBuffer: Array<{ type: string; timestamp: number; metadata?: Record<string, unknown> }> = [];
@@ -91,6 +93,7 @@ export class DevLock {
     this.ws = new WebSocketManager(this.emitter, this.config.wsUrl, this.config.projectKey);
     this.tamper = new TamperDetector(this.emitter);
     this.watermark = new WatermarkManager();
+    this.overlay = new OverlayManager();
 
     this.bindCallbacks(this.config.on);
     this.bindInternalEvents();
@@ -454,18 +457,24 @@ export class DevLock {
 
     this.emitter.on('maintenance:enabled', (data) => {
       this.state.maintenance = data as any;
+      const msg = (data as any)?.message || 'We are currently performing maintenance. Please check back later.';
+      this.overlay.show('Maintenance Mode', msg, false);
     });
 
     this.emitter.on('maintenance:disabled', () => {
       this.state.maintenance = { enabled: false };
+      this.overlay.hide();
     });
 
     this.emitter.on('killswitch:activated', (data) => {
       this.state.killSwitch = { enabled: true, reason: (data as any)?.reason };
+      const msg = (data as any)?.reason || 'Access to this application has been restricted.';
+      this.overlay.show('Access Blocked', msg, false);
     });
 
     this.emitter.on('killswitch:deactivated', () => {
       this.state.killSwitch = { enabled: false };
+      this.overlay.hide();
     });
 
     this.emitter.on('feature:toggled', (flag, enabled) => {
@@ -473,7 +482,14 @@ export class DevLock {
     });
 
     this.emitter.on('notification:push', (notif) => {
-      this.state.notifications.push(notif as RemoteNotification);
+      const n = notif as RemoteNotification;
+      this.state.notifications.push(n);
+      
+      // Auto-show high severity or payment notifications via blocking overlay
+      if (n.severity === 'high' || n.type === 'payment') {
+        const title = n.type === 'payment' ? 'Payment Required' : 'Important Notice';
+        this.overlay.show(title, n.message, n.dismissible);
+      }
     });
   }
 

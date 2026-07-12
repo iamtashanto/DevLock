@@ -1,6 +1,6 @@
 {
   "name": "devlock-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "DevLock Frontend SDK for React, Next.js, and Vanilla JS. Integrate license validation, remote kill-switch, feature flags, and domain locking into your web applications securely.",
   "author": {
     "name": "Md Tanvir Ahamed Shanto",
