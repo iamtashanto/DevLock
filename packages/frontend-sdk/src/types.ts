@@ -23,6 +23,13 @@ export interface DevLockConfig {
   watermark?: boolean;
   /** Custom watermark text */
   watermarkText?: string;
+  /**
+   * How the SDK behaves when DevLock's servers are unreachable and there is no
+   * usable cache. `'open'` (default) never throws and lets the host application
+   * keep running — DevLock going down must never break the client's website.
+   * `'closed'` re-throws the init error so the host can hard-fail on purpose.
+   */
+  failBehavior?: 'open' | 'closed';
   /** Event callbacks */
   on?: DevLockCallbacks;
 }
@@ -155,6 +162,7 @@ export interface ValidationResponse {
   valid: boolean;
   license: { status: string; features: string[]; expiresAt?: string };
   config: {
+    version?: number;
     maintenance: MaintenanceConfig;
     killSwitch: KillSwitchConfig;
     notifications: RemoteNotification[];

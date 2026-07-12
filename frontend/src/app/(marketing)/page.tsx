@@ -19,7 +19,7 @@ export default function LandingPage() {
             <a href="#pricing" className="text-sm text-slate-300 transition hover:text-white">Pricing</a>
             <a href="#faq" className="text-sm text-slate-300 transition hover:text-white">FAQ</a>
             <a
-              href="https://github.com/mdtanvirahamedshanto/DevLock"
+              href="https://github.com/iamtashanto/DevLock"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-slate-300 transition hover:text-white"
@@ -64,7 +64,7 @@ export default function LandingPage() {
                   Get Started Free
                 </a>
                 <a
-                  href="https://github.com/mdtanvirahamedshanto/DevLock"
+                  href="https://github.com/iamtashanto/DevLock"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-8 py-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 sm:w-auto"
@@ -721,7 +721,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-6 flex gap-4">
                 <a
-                  href="https://github.com/mdtanvirahamedshanto/DevLock"
+                  href="https://github.com/iamtashanto/DevLock"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-500 transition hover:text-white"
@@ -763,10 +763,10 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-semibold text-white">Resources</h4>
               <ul className="mt-4 space-y-3">
-                <li><a href="https://github.com/mdtanvirahamedshanto/DevLock" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">Documentation</a></li>
-                <li><a href="https://github.com/mdtanvirahamedshanto/DevLock" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">API Reference</a></li>
+                <li><a href="https://github.com/iamtashanto/DevLock" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">Documentation</a></li>
+                <li><a href="https://github.com/iamtashanto/DevLock" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">API Reference</a></li>
                 <li><a href="#faq" className="text-sm text-slate-400 transition hover:text-white">FAQ</a></li>
-                <li><a href="https://github.com/mdtanvirahamedshanto/DevLock/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">Contributing</a></li>
+                <li><a href="https://github.com/iamtashanto/DevLock/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 transition hover:text-white">Contributing</a></li>
               </ul>
             </div>
 

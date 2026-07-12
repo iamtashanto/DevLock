@@ -92,7 +92,7 @@ devlock/
 
 ```bash
 # Clone the repository
-git clone https://github.com/mdtanvirahamedshanto/DevLock.git
+git clone https://github.com/iamtashanto/DevLock.git
 cd DevLock
 
 # Install all dependencies

@@ -110,6 +110,17 @@ export function createMiddleware(options: MiddlewareOptions): RequestHandler {
       domain: req.hostname,
     });
 
+    // Fail-open (default): a `'unknown'` result means DevLock could not be
+    // reached and no cached decision exists — do not block the host app's
+    // traffic on our outage. Definitive negatives (suspended/expired/revoked)
+    // still block, so kill-switch / non-payment enforcement is unaffected.
+    const indeterminate = result.status === 'unknown' && !!result.error;
+    if (indeterminate && options.failBehavior !== 'closed') {
+      req.devlock = buildContext(client, result, licenseKey, req);
+      next();
+      return;
+    }
+
     if (!result.valid) {
       if (options.onUnauthorized) {
         options.onUnauthorized(req, res, result);
@@ -120,14 +131,23 @@ export function createMiddleware(options: MiddlewareOptions): RequestHandler {
     }
 
     // Attach DevLock context to request
-    req.devlock = {
-      license: result,
-      isFeatureEnabled: (flag) => client.isFeatureEnabled(flag),
-      getConfig: (key, def) => client.getConfig(key, def),
-      track: (event, metadata) => client.track({ type: event, timestamp: Date.now(), metadata, licenseKey, ip: req.ip, path: req.path }),
-    };
+    req.devlock = buildContext(client, result, licenseKey, req);
 
     next();
+  };
+}
+
+function buildContext(
+  client: DevLock,
+  license: ValidationResult,
+  licenseKey: string,
+  req: Request,
+): NonNullable<Request['devlock']> {
+  return {
+    license,
+    isFeatureEnabled: (flag) => client.isFeatureEnabled(flag),
+    getConfig: (key, def) => client.getConfig(key, def),
+    track: (event, metadata) => client.track({ type: event, timestamp: Date.now(), metadata, licenseKey, ip: req.ip, path: req.path }),
   };
 }
 

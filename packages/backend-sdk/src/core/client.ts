@@ -65,6 +65,7 @@ export class DevLock {
       cacheTtl: config.cacheTtl ?? DEFAULT_CACHE_TTL,
       offlineGraceHours: config.offlineGraceHours ?? DEFAULT_GRACE_HOURS,
       realtime: config.realtime ?? true,
+      failBehavior: config.failBehavior ?? 'open',
       redis: config.redis,
       on: config.on,
     };
@@ -108,9 +109,18 @@ export class DevLock {
         this.state = cached;
         this.state.initialized = true;
         this.logger.warn('[DevLock] Initialized from cache (offline mode)');
-      } else {
+        return;
+      }
+
+      // Fail-open (default): DevLock being unreachable must never break the host
+      // service. Initialize in a permissive state so the client's application
+      // keeps serving traffic. Opt into hard-failing with `failBehavior: 'closed'`.
+      if (this.config.failBehavior === 'closed') {
         throw err;
       }
+
+      this.state.initialized = true;
+      this.logger.warn('[DevLock] Init failed — continuing in fail-open mode (host service unaffected)');
     }
   }
 

@@ -19,6 +19,13 @@ export interface DevLockConfig {
   offlineGraceHours?: number;
   /** Enable WebSocket for real-time updates (default: true) */
   realtime?: boolean;
+  /**
+   * How the SDK behaves when DevLock's servers are unreachable and there is no
+   * usable cache. `'open'` (default) never throws from `init()` so the host
+   * service keeps serving traffic — DevLock going down must never take down the
+   * client's application. `'closed'` re-throws so the host can hard-fail.
+   */
+  failBehavior?: 'open' | 'closed';
   /** Redis client for distributed caching (optional) */
   redis?: RedisLike;
   /** Custom logger (default: console) */

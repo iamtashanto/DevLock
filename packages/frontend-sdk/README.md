@@ -5,6 +5,10 @@
 [![npm version](https://img.shields.io/npm/v/devlock-client.svg)](https://www.npmjs.com/package/devlock-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+🌐 **Website & Dashboard:** [devlock.tashanto.com](https://devlock.tashanto.com) · 🖥️ **Backend SDK:** [`devlock-sdk`](https://www.npmjs.com/package/devlock-sdk)
+
+> **Fail-safe by design.** If DevLock's servers are ever unreachable, this SDK never throws and never blocks your app — your website keeps running smoothly. See [Fail-open behavior](#fail-open-behavior).
+
 ## Features
 
 - 🔐 **License Validation** — Verify licenses with HMAC-signed requests
@@ -233,12 +237,34 @@ The SDK automatically caches validation results and supports offline operation:
 4. After grace period expires, license is considered invalid
 5. On reconnection, SDK automatically revalidates
 
+## Fail-open behavior
+
+DevLock is a safety layer for **your** app — it must never become a single point of
+failure. If DevLock's servers are unreachable and there is no usable cache, the SDK
+**does not throw and does not block rendering**. `init()` resolves in a permissive
+offline state and your application keeps running exactly as normal.
+
+```typescript
+const devlock = new DevLock({
+  projectKey: 'pk_live_xxx',
+  // failBehavior: 'open',  // default — never break the host app
+  // failBehavior: 'closed', // opt in to hard-failing if you *want* to block
+});
+
+await devlock.init(); // never rejects when failBehavior is 'open'
+```
+
+Enforcement signals (kill-switch, suspension, maintenance) are still delivered and
+**cached** — once received they persist across reloads, so an offline period cannot be
+used to bypass a lock that was already issued.
+
 ## Links
 
-- [GitHub Repository](https://github.com/mdtanvirahamedshanto/DevLock)
-- [Documentation](https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/frontend-sdk)
+- [Website & Dashboard](https://devlock.tashanto.com)
+- [GitHub Repository](https://github.com/iamtashanto/DevLock)
+- [Documentation](https://github.com/iamtashanto/DevLock/tree/main/packages/frontend-sdk)
 - [Backend SDK (devlock-sdk)](https://www.npmjs.com/package/devlock-sdk)
-- [Report Issues](https://github.com/mdtanvirahamedshanto/DevLock/issues)
+- [Report Issues](https://github.com/iamtashanto/DevLock/issues)
 
 ## License
 

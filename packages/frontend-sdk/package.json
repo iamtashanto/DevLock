@@ -80,12 +80,18 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/mdtanvirahamedshanto/DevLock",
+    "url": "https://github.com/iamtashanto/DevLock",
     "directory": "packages/frontend-sdk"
   },
-  "homepage": "https://github.com/mdtanvirahamedshanto/DevLock/tree/main/packages/frontend-sdk",
+  "homepage": "https://devlock.tashanto.com",
   "bugs": {
-    "url": "https://github.com/mdtanvirahamedshanto/DevLock/issues"
+    "url": "https://github.com/iamtashanto/DevLock/issues"
+  },
+  "devlock": {
+    "website": "https://devlock.tashanto.com",
+    "dashboard": "https://devlock.tashanto.com/dashboard",
+    "docs": "https://github.com/iamtashanto/DevLock/tree/main/packages/frontend-sdk",
+    "backendSdk": "https://www.npmjs.com/package/devlock-sdk"
   },
   "sideEffects": false
 }

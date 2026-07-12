@@ -68,6 +68,7 @@ export class DevLock {
       tamperDetection: config.tamperDetection ?? true,
       watermark: config.watermark ?? false,
       watermarkText: config.watermarkText ?? 'UNLICENSED',
+      failBehavior: config.failBehavior ?? 'open',
       on: config.on ?? {},
     };
 
@@ -140,7 +141,20 @@ export class DevLock {
         (err as Error).message, 'INIT_FAILED', true
       );
       this.emitter.emit('error', error);
-      throw error;
+
+      // Fail-open (default): DevLock being unreachable must never break the host
+      // application. We mark the SDK initialized in a permissive offline state so
+      // the client's website keeps running smoothly. The developer can opt into
+      // hard-failing with `failBehavior: 'closed'`.
+      if (this.config.failBehavior === 'closed') {
+        throw error;
+      }
+
+      this.state.initialized = true;
+      this.state.offline = true;
+      this.log('Init failed — continuing in fail-open mode (host app unaffected)');
+      this.emitter.emit('ready', this.state);
+      return this.state;
     }
   }
 
