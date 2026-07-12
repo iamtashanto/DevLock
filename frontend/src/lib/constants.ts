@@ -64,7 +64,7 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
   },
   {
     title: 'Analytics',
-    href: '/projects', // Consider fixing this to point to a real analytics route if one exists
+    href: '/analytics',
     icon: BarChart3,
     permission: 'analytics:read',
   },

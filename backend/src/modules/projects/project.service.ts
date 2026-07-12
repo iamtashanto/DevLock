@@ -49,7 +49,7 @@ export class ProjectService {
     const project = await ProjectModel.findOne({
       _id: new mongoose.Types.ObjectId(projectId),
       tenantId: new mongoose.Types.ObjectId(tenantId)
-    }).lean();
+    }).select('+secretKey').lean();
 
     if (!project) throw new NotFoundError('Project not found');
     return this.mapProject(project);

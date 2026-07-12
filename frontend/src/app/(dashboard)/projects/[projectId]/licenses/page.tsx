@@ -14,9 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, Search, Key, MoreVertical, Ban, RotateCcw, XCircle } from 'lucide-react';
+import { Plus, Search, Key, MoreVertical, Ban, RotateCcw, XCircle, Copy, CheckCircle2 } from 'lucide-react';
 import { useDebounce } from '@/hooks/use-debounce';
 import { formatRelative } from '@/lib/utils';
 
@@ -37,6 +37,9 @@ export default function LicensesPage() {
     expiresAt: '',
   });
 
+  const [newLicenseKey, setNewLicenseKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const [confirmAction, setConfirmAction] = useState<{
     type: 'suspend' | 'revoke';
     licenseId: string;
@@ -56,9 +59,10 @@ export default function LicensesPage() {
 
   const createMutation = useMutation({
     mutationFn: (payload: any) => licenseService.create(projectId, payload),
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['licenses', projectId] });
       setIsCreateOpen(false);
+      setNewLicenseKey(data.key || data.data?.key || data.license?.key || data.data?.license?.key || 'Failed to retrieve key from response, check audit logs');
       setCreateData({
         holderName: '',
         holderEmail: '',
@@ -272,25 +276,16 @@ export default function LicensesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="max-devices">Max Devices</Label>
+                <Label htmlFor="expires-at">Expiry Date (optional)</Label>
                 <Input
-                  id="max-devices"
-                  type="number"
-                  min={1}
-                  value={createData.maxDevices}
-                  onChange={(e) => setCreateData({ ...createData, maxDevices: Number(e.target.value) || 1 })}
+                  id="expires-at"
+                  type="date"
+                  value={createData.expiresAt}
+                  onChange={(e) => setCreateData({ ...createData, expiresAt: e.target.value })}
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="expires-at">Expiry Date (optional)</Label>
-              <Input
-                id="expires-at"
-                type="date"
-                value={createData.expiresAt}
-                onChange={(e) => setCreateData({ ...createData, expiresAt: e.target.value })}
-              />
-            </div>
+
             {createError && <p className="text-sm text-destructive">{createError}</p>}
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
@@ -301,6 +296,37 @@ export default function LicensesPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Show New License Key Dialog */}
+      <Dialog open={!!newLicenseKey} onOpenChange={(open) => { if (!open) { setNewLicenseKey(null); setCopied(false); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>License Created Successfully!</DialogTitle>
+            <DialogDescription>
+              Please copy this license key now. For security reasons, you won't be able to see it again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-md border border-border font-mono text-sm break-all">
+              <span className="flex-1">{newLicenseKey}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(newLicenseKey || '');
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+              >
+                {copied ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setNewLicenseKey(null)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

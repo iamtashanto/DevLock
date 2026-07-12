@@ -22,8 +22,6 @@ export default function ConfigPage() {
   const queryClient = useQueryClient();
   const [killSwitchDialog, setKillSwitchDialog] = useState(false);
   const [killSwitchReason, setKillSwitchReason] = useState('');
-  const [killSwitchDialog, setKillSwitchDialog] = useState(false);
-  const [killSwitchReason, setKillSwitchReason] = useState('');
 
   const { data: config, isLoading } = useQuery({
     queryKey: ['config', projectId],
