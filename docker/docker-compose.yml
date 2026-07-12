@@ -6,14 +6,16 @@ services:
     image: mongo:7
     container_name: devlock-mongo
     volumes: ['./volumes/mongo:/data/db']
-    command: ['--replSet', 'rs0', '--bind_ip_all']
+    command: ['--port', '27018', '--replSet', 'rs0', '--bind_ip_all']
     healthcheck:
       test:
         [
           'CMD',
           'mongosh',
+          '--port',
+          '27018',
           '--eval',
-          "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}).ok }",
+          "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27018'}]}).ok }",
         ]
       interval: 10s
       timeout: 5s
@@ -22,10 +24,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: devlock-redis
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --port 6380 --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes: ['./volumes/redis:/data']
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '-p', '6380', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -36,12 +38,12 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     container_name: devlock-backend
-    ports: ['3001:3000']
+    ports: ['6000:6000']
     env_file: ../.env
     environment:
-      - PORT=3000
-      - MONGODB_URI=mongodb://mongodb:27017/devlock?replicaSet=rs0
-      - REDIS_URL=redis://redis:6379
+      - PORT=6000
+      - MONGODB_URI=mongodb://mongodb:27018/devlock?replicaSet=rs0
+      - REDIS_URL=redis://redis:6380
     depends_on:
       mongodb: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -51,7 +53,7 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     container_name: devlock-frontend
-    ports: ['4000:4000']
+    ports: ['6001:6001']
     env_file: ../.env
     depends_on: [backend]
 

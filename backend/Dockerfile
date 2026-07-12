@@ -20,6 +20,6 @@ COPY --from=builder --chown=devlock:devlock /app/package.json ./
 COPY --from=builder --chown=devlock:devlock /app/node_modules ./node_modules
 
 USER devlock
-EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:3000/health || exit 1
+EXPOSE 6000
+HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:6000/health || exit 1
 CMD ["node", "dist/index.js"]
