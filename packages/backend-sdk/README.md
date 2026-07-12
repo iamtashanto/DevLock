@@ -47,7 +47,17 @@ Before using the SDK, you need to create a project and obtain your keys from the
 1. Go to **[DevLock Dashboard](https://devlock.tashanto.com)**.
 2. Sign in and navigate to the **Projects** section.
 3. Click **Create Project** and fill in your details.
-4. Copy your **Project ID** and **Secret Key** (`sk_live_...`). Note that the Secret Key must be kept secure and never exposed to the frontend.
+4. Copy your **Project Public Key** (`pk_live_...`) and **Secret Key** (`sk_live_...`).
+
+> ⚠️ **Key Naming:** The `projectId` field in the SDK config is your **Public Key** (`pk_live_...`), not a separate UUID. The **Secret Key** (`sk_live_...`) must be kept secure and never exposed to the frontend.
+
+### Recommended `.env` setup
+
+```bash
+DEVLOCK_PROJECT_ID=pk_live_your_public_key_here
+DEVLOCK_SECRET_KEY=sk_live_your_secret_key_here
+DEVLOCK_LICENSE_KEY=DLCK-XXXX-XXXX-XXXX-XXXX
+```
 
 ## Quick Start
 
@@ -59,12 +69,15 @@ import { createMiddleware } from 'devlock-sdk/express';
 
 const app = express();
 
-// Protect all routes with license validation
 app.use(createMiddleware({
   secretKey: process.env.DEVLOCK_SECRET_KEY!,
-  projectId: process.env.DEVLOCK_PROJECT_ID!,
+  projectId: process.env.DEVLOCK_PROJECT_ID!,   // ← your pk_live_... key
   excludePaths: ['/health', '/public', '/webhooks'],
+  failBehavior: 'open',   // recommended — never block traffic on DevLock outage
   on: {
+    onReady: () => {
+      console.log('DevLock license protection active');
+    },
     onKillSwitch: (reason) => {
       console.error('Kill switch activated:', reason);
     },
@@ -78,19 +91,36 @@ app.use(createMiddleware({
 app.get('/api/data', (req, res) => {
   const { license, isFeatureEnabled, track } = req.devlock!;
 
-  // Check features
   if (isFeatureEnabled('advanced-export')) {
     // serve premium feature
   }
 
-  // Track usage
   track('data_accessed', { endpoint: '/api/data' });
-
   res.json({ features: license.features, status: license.status });
 });
 
 app.listen(3000);
 ```
+
+### Single-App License (No per-user license keys)
+
+If your app has **one license for the whole application** (not per-user SaaS), use `extractLicenseKey` to always return your app's license key:
+
+```typescript
+app.use(createMiddleware({
+  secretKey: process.env.DEVLOCK_SECRET_KEY!,
+  projectId: process.env.DEVLOCK_PROJECT_ID!,
+  failBehavior: 'open',
+  // Return the app's own license key for every request
+  extractLicenseKey: (_req) => process.env.DEVLOCK_LICENSE_KEY,
+  excludePaths: ['/health', '/auth/login'],
+}));
+```
+
+This pattern is ideal for:
+- Internal tools / admin dashboards
+- B2B SaaS apps sold as a single deployment
+- Desktop apps built with Electron
 
 ### Fastify
 
@@ -170,8 +200,8 @@ devlock.destroy();
 ```typescript
 const devlock = new DevLock({
   // Required
-  secretKey: 'sk_live_xxx',          // Project secret key
-  projectId: 'proj_xxx',             // Project ID
+  secretKey: 'sk_live_xxx',          // Project secret key (keep server-side only)
+  projectId: 'pk_live_xxx',          // Project public key (from Dashboard → Projects)
 
   // Optional
   apiUrl: 'https://dl-api.tashanto.com',  // Custom API URL
@@ -181,6 +211,7 @@ const devlock = new DevLock({
   cacheTtl: 300000,                   // License cache TTL (ms, default: 5min)
   offlineGraceHours: 72,             // Offline grace period (hours)
   realtime: true,                     // Enable WebSocket updates
+  failBehavior: 'open',              // 'open' (default) | 'closed'
   redis: redisClient,                 // Optional Redis for distributed caching
   logger: customLogger,               // Custom logger (default: console)
 });
@@ -259,6 +290,14 @@ app.use(createMiddleware({
 }));
 ```
 
+For single-app deployments (one license for the whole app):
+```typescript
+app.use(createMiddleware({
+  ...config,
+  extractLicenseKey: (_req) => process.env.DEVLOCK_LICENSE_KEY,
+}));
+```
+
 ## Fail-open behavior
 
 > ### 🔒 The safety guarantee
@@ -281,7 +320,7 @@ failure. If DevLock's servers are unreachable and there is no cached decision:
 app.use(createMiddleware({
   secretKey: process.env.DEVLOCK_SECRET_KEY!,
   projectId: process.env.DEVLOCK_PROJECT_ID!,
-  // failBehavior: 'open',   // default — never break the host service
+  failBehavior: 'open',    // default — never break the host service
   // failBehavior: 'closed', // opt in to blocking when DevLock is unreachable
 }));
 ```
@@ -297,6 +336,7 @@ When integrating the SDK into a local service (e.g., `http://localhost:3000`), y
 
 1. **No URL changes needed:** Do not set `apiUrl` or `wsUrl` locally unless you are running your own self-hosted DevLock server. The SDK will automatically connect to your production DevLock servers.
 2. **Domain Lock:** For backend API endpoints, domain locking usually applies to where the request originates. If you enforce Domain Locking, ensure `localhost` or `127.0.0.1` is added to the **Allowed Domains** in your DevLock Dashboard (or leave the list completely empty to allow all domains).
+3. **Use `failBehavior: 'open'`** (default) during development — if DevLock servers are unreachable, your app will still run normally. You'll see `[DevLock] Config sync failed` in the logs, which is expected in offline/local environments.
 
 ## Links
 

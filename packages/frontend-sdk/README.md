@@ -48,8 +48,21 @@ Before using the SDK, you need to create a project and obtain your keys from the
 1. Go to **[DevLock Dashboard](https://devlock.tashanto.com)**.
 2. Sign in and navigate to the **Projects** section.
 3. Click **Create Project** and fill in your details.
-4. Copy your **Project Key** (starts with `pk_live_...`).
+4. Copy your **Project Public Key** (`pk_live_...`). This is safe to expose in your frontend.
 5. (Optional) Generate a **License Key** for your users from the Licenses page.
+
+### Recommended `.env` setup (Vite)
+
+```bash
+VITE_DEVLOCK_PROJECT_KEY=pk_live_your_public_key_here
+VITE_DEVLOCK_LICENSE_KEY=DLCK-XXXX-XXXX-XXXX-XXXX
+```
+
+For Next.js:
+```bash
+NEXT_PUBLIC_DEVLOCK_PROJECT_KEY=pk_live_your_public_key_here
+NEXT_PUBLIC_DEVLOCK_LICENSE_KEY=DLCK-XXXX-XXXX-XXXX-XXXX
+```
 
 ## Quick Start
 
@@ -92,15 +105,14 @@ devlock.track('export_clicked', { format: 'pdf' });
 ```tsx
 import { DevLockProvider, useDevLock, useFeatureFlag } from 'devlock-client/react';
 
-// Wrap your app
+// Wrap your app in main.tsx or App.tsx
 function App() {
   return (
     <DevLockProvider
       config={{
-        projectKey: 'pk_live_your_project_key',
-        licenseKey: 'DLCK-XXXX-XXXX-XXXX-XXXX',
+        projectKey: import.meta.env.VITE_DEVLOCK_PROJECT_KEY,
+        licenseKey: import.meta.env.VITE_DEVLOCK_LICENSE_KEY,
       }}
-      fallback={<LoadingScreen />}
     >
       <MyApp />
     </DevLockProvider>
@@ -136,12 +148,12 @@ function Dashboard() {
 'use client';
 import { DevLockProvider } from 'devlock-client/next';
 
-export function Providers({ children }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <DevLockProvider
       config={{
-        projectKey: process.env.NEXT_PUBLIC_DEVLOCK_KEY!,
-        licenseKey: process.env.NEXT_PUBLIC_DEVLOCK_LICENSE!,
+        projectKey: process.env.NEXT_PUBLIC_DEVLOCK_PROJECT_KEY!,
+        licenseKey: process.env.NEXT_PUBLIC_DEVLOCK_LICENSE_KEY,
       }}
     >
       {children}
@@ -175,19 +187,20 @@ const isPremium = useFeatureFlag('premium');
 ```typescript
 const devlock = new DevLock({
   // Required
-  projectKey: 'pk_live_xxx',
+  projectKey: 'pk_live_xxx',                    // Public key from Dashboard
 
   // Optional
-  licenseKey: 'DLCK-XXXX-XXXX-XXXX-XXXX',
-  apiUrl: 'https://dl-api.tashanto.com',    // Custom API URL
-  wsUrl: 'wss://dl-ws.tashanto.com',        // Custom WebSocket URL
-  environment: 'production',                // 'production' | 'staging' | 'development'
-  debug: false,                             // Enable console logging
-  offlineGraceHours: 72,                   // Hours to allow offline operation
-  heartbeatInterval: 30000,                // Heartbeat interval (ms)
-  tamperDetection: true,                   // Enable tamper detection
-  watermark: false,                        // Show watermark when license invalid
-  watermarkText: 'UNLICENSED',            // Custom watermark text
+  licenseKey: 'DLCK-XXXX-XXXX-XXXX-XXXX',      // User or app license key
+  apiUrl: 'https://dl-api.tashanto.com',         // Custom API URL (don't set unless self-hosting)
+  wsUrl: 'wss://dl-ws.tashanto.com',             // Custom WebSocket URL
+  environment: 'production',                     // 'production' | 'staging' | 'development'
+  debug: false,                                  // Enable console logging (useful in development)
+  offlineGraceHours: 72,                        // Hours to allow offline operation
+  heartbeatInterval: 30000,                     // Heartbeat interval (ms)
+  tamperDetection: true,                        // Enable tamper detection
+  watermark: false,                             // Show watermark when license invalid
+  watermarkText: 'UNLICENSED',                 // Custom watermark text
+  failBehavior: 'open',                         // 'open' (default) | 'closed'
 });
 ```
 
@@ -275,10 +288,15 @@ used to bypass a lock that was already issued.
 
 ## Local Development & Testing
 
-When you integrate the SDK into a local project (e.g., `http://localhost:3000`), you can test it directly against your production DevLock account.
+When you integrate the SDK into a local project (e.g., `http://localhost:5173`), you can test it directly against your production DevLock account.
 
-1. **No URL changes needed:** Do not set `apiUrl` or `wsUrl` locally unless you are running your own self-hosted DevLock server. The SDK will automatically connect to your production DevLock servers.
-2. **Domain Lock:** If you have enabled **Domain Lock** in your DevLock Dashboard for this project, you must explicitly add `localhost` or `127.0.0.1` to the **Allowed Domains** list. If the list is completely empty, it allows all domains by default.
+1. **No URL changes needed:** Do not set `apiUrl` or `wsUrl` locally. The SDK automatically connects to the production DevLock servers.
+2. **Domain Lock:** If you have enabled **Domain Lock** in your DevLock Dashboard, add `localhost` or `127.0.0.1` to the **Allowed Domains** list. An empty list allows all domains by default.
+3. **Enable debug mode** during development to see logs in the browser console:
+   ```typescript
+   config={{ projectKey: '...', debug: true }}
+   ```
+4. **CORS:** The DevLock API server (`dl-api.tashanto.com`) accepts requests from any origin by default. If you are self-hosting DevLock, ensure your server allows your frontend domain.
 
 ## Links
 
