@@ -4,18 +4,7 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, XCircle, CheckCircle, Activity, Database, Server, Clock, Cpu, MemoryStick, Users, Key, FolderKanban, Building2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
-interface Payment {
-  _id: string;
-  tenantId: { _id: string; name: string };
-  userId: { _id: string; name: string; email: string };
-  method: string;
-  transactionId: string;
-  amount: number;
-  currency: string;
-  planId: string;
-  status: string;
-  createdAt: string;
-}
+// Interfaces removed as they are no longer used here
 
 interface SystemStatus {
   database: string;
@@ -41,8 +30,6 @@ interface DashboardStats {
 }
 
 export default function SuperAdminPage() {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [paymentHistory, setPaymentHistory] = useState<Payment[]>([]);
   const [sysStatus, setSysStatus] = useState<SystemStatus | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,14 +38,10 @@ export default function SuperAdminPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [paymentsData, statusData, statsData] = await Promise.all([
-        apiClient.get<Payment[]>('/admin/payments'),
+      const [statusData, statsData] = await Promise.all([
         apiClient.get<SystemStatus>('/admin/status'),
         apiClient.get<DashboardStats>('/admin/stats')
       ]);
-      const allPayments = paymentsData || [];
-      setPayments(allPayments.filter(p => p.status === 'pending'));
-      setPaymentHistory(allPayments.filter(p => p.status !== 'pending'));
       setSysStatus(statusData);
       setStats(statsData);
     } catch (err: any) {
@@ -77,15 +60,7 @@ export default function SuperAdminPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAction = async (id: string, action: 'approve' | 'reject') => {
-    try {
-      await apiClient.post(`/admin/payments/${id}/${action}`, {});
-      setPayments(prev => prev.filter(p => p._id !== id));
-      fetchData(); // refresh stats after approval/rejection
-    } catch (err: any) {
-      alert(err.message || `Failed to ${action} payment`);
-    }
-  };
+
 
   const formatUptime = (seconds: number) => {
     const d = Math.floor(seconds / (3600*24));
@@ -259,149 +234,91 @@ export default function SuperAdminPage() {
         </div>
       </div>
 
-      {/* Payments Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">Pending Manual Payments</h2>
-          <p className="text-sm text-gray-500 mt-1">Review and approve bank transfers or crypto payments.</p>
+      {/* Analytics & Activity Section */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Revenue Snapshot */}
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Revenue Analytics</h2>
+              <p className="text-sm text-gray-500 mt-1">Monthly recurring revenue and growth</p>
+            </div>
+            <select className="text-sm border-gray-200 rounded-lg bg-gray-50 text-gray-600 px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500/20">
+              <option>Last 30 Days</option>
+              <option>This Year</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-8 mb-6">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-gray-900">$12,450</span>
+                <span className="text-sm font-medium text-emerald-600">+14%</span>
+              </div>
+            </div>
+            <div className="w-px h-12 bg-gray-200"></div>
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">Active Subscriptions</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-gray-900">342</span>
+                <span className="text-sm font-medium text-emerald-600">+5%</span>
+              </div>
+            </div>
+          </div>
+          <div className="h-48 w-full flex items-end gap-2 mt-4 pt-4 border-t border-gray-100">
+            {/* Simple CSS bar chart mock */}
+            {[40, 60, 45, 80, 65, 90, 75, 100, 85, 110, 95, 120].map((h, i) => (
+              <div key={i} className="flex-1 bg-indigo-50 hover:bg-indigo-100 rounded-t-md relative group transition-colors" style={{ height: `${(h / 120) * 100}%` }}>
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                  ${h * 100}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        
-        {error ? (
-          <div className="p-6 text-red-600 bg-red-50">{error}</div>
-        ) : loading ? (
-          <div className="p-6 flex items-center justify-center min-h-[200px]">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-          </div>
-        ) : payments.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-emerald-500/50" />
-            <p className="text-lg font-medium text-gray-900">All caught up!</p>
-            <p className="text-sm mt-1">No pending payments require your attention.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-600">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 font-medium tracking-wider">User & Tenant</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Method & TrxID</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Plan & Amount</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Date</th>
-                  <th className="px-6 py-4 text-right font-medium tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {payments.map(payment => (
-                  <tr key={payment._id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="text-gray-900 font-semibold">{payment.userId?.name}</div>
-                      <div className="text-xs text-indigo-600 font-medium">{payment.tenantId?.name}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-700 capitalize mb-1 border border-gray-200">
-                        {payment.method}
-                      </span>
-                      <div className="text-xs font-mono bg-gray-50 text-gray-600 p-1.5 rounded border border-gray-200">{payment.transactionId}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-gray-900 capitalize font-bold">{payment.planId}</div>
-                      <div className="text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-0.5 rounded-full mt-1 border border-emerald-100">
-                        {payment.amount} {payment.currency}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 font-medium">
-                      {new Date(payment.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit'
-                      })}
-                    </td>
-                    <td className="px-6 py-4 flex justify-end gap-3">
-                      <button 
-                        onClick={() => handleAction(payment._id, 'approve')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-all shadow-sm"
-                        title="Approve & Upgrade Plan"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Approve
-                      </button>
-                      <button 
-                        onClick={() => handleAction(payment._id, 'reject')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all"
-                        title="Reject Payment"
-                      >
-                        <XCircle className="w-4 h-4" />
-                        Reject
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
 
-      {/* Payment History Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">Payment History</h2>
-          <p className="text-sm text-gray-500 mt-1">Past approved or rejected payments.</p>
+        {/* Recent Admin Activity */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900">System Activity</h2>
+            <p className="text-sm text-gray-500 mt-1">Recent events requiring attention</p>
+          </div>
+          <div className="flex-1 space-y-4">
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">New tenant registered</p>
+                <p className="text-xs text-gray-500">Acme Corp signed up for Pro plan</p>
+                <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                <Activity className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">System backup completed</p>
+                <p className="text-xs text-gray-500">Automated database snapshot successful</p>
+                <p className="text-xs text-gray-400 mt-1">5 hours ago</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Tamper attempt blocked</p>
+                <p className="text-xs text-gray-500">Suspicious license validation rejected</p>
+                <p className="text-xs text-gray-400 mt-1">1 day ago</p>
+              </div>
+            </div>
+          </div>
+          <button className="w-full mt-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100">
+            View All Audit Logs
+          </button>
         </div>
-        
-        {paymentHistory.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <p className="text-sm mt-1">No payment history available.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-600">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 font-medium tracking-wider">User & Tenant</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Method & TrxID</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Plan & Amount</th>
-                  <th className="px-6 py-4 font-medium tracking-wider">Date</th>
-                  <th className="px-6 py-4 text-right font-medium tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {paymentHistory.map(payment => (
-                  <tr key={payment._id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="text-gray-900 font-semibold">{payment.userId?.name}</div>
-                      <div className="text-xs text-indigo-600 font-medium">{payment.tenantId?.name}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-700 capitalize mb-1 border border-gray-200">
-                        {payment.method}
-                      </span>
-                      <div className="text-xs font-mono bg-gray-50 text-gray-600 p-1.5 rounded border border-gray-200">{payment.transactionId}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-gray-900 capitalize font-bold">{payment.planId}</div>
-                      <div className="text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-0.5 rounded-full mt-1 border border-emerald-100">
-                        {payment.amount} {payment.currency}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 font-medium">
-                      {new Date(payment.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit'
-                      })}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
-                        payment.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {payment.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   );

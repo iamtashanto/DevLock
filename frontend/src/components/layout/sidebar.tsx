@@ -94,13 +94,39 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 href="/superadmin"
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-red-400 hover:bg-red-500/10 hover:text-red-300',
-                  isActive('/superadmin') && 'bg-red-500/10 text-red-300',
+                  isActive('/superadmin') && !pathname.includes('/superadmin/payments') && 'bg-red-500/10 text-red-300',
                   collapsed && 'justify-center px-2'
                 )}
                 title={collapsed ? 'Super Admin' : undefined}
               >
                 <Shield className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>Super Admin</span>}
+                {!collapsed && <span>Dashboard</span>}
+              </Link>
+              
+              <Link
+                href="/superadmin/payments/pending"
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-red-400 hover:bg-red-500/10 hover:text-red-300',
+                  isActive('/superadmin/payments/pending') && 'bg-red-500/10 text-red-300',
+                  collapsed && 'justify-center px-2'
+                )}
+                title={collapsed ? 'Pending Payments' : undefined}
+              >
+                <Shield className="h-5 w-5 shrink-0 opacity-0" /> {/* Spacer for alignment */}
+                {!collapsed && <span>Pending Payments</span>}
+              </Link>
+              
+              <Link
+                href="/superadmin/payments/history"
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-red-400 hover:bg-red-500/10 hover:text-red-300',
+                  isActive('/superadmin/payments/history') && 'bg-red-500/10 text-red-300',
+                  collapsed && 'justify-center px-2'
+                )}
+                title={collapsed ? 'Payment History' : undefined}
+              >
+                <Shield className="h-5 w-5 shrink-0 opacity-0" />
+                {!collapsed && <span>Payment History</span>}
               </Link>
             </div>
           </>
