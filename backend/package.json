@@ -11,7 +11,10 @@
     "lint": "eslint src/ --ext .ts",
     "lint:fix": "eslint src/ --ext .ts --fix",
     "test": "vitest run",
-    "test:ci": "vitest run --coverage"
+    "test:ci": "vitest run --coverage",
+    "seed:plans": "tsx -r tsconfig-paths/register scripts/seed-plans.ts",
+    "seed:superadmin": "tsx -r tsconfig-paths/register scripts/create-superadmin.ts",
+    "seed": "npm run seed:plans"
   },
   "dependencies": {
     "compression": "^1.7.4",
@@ -26,6 +29,7 @@
     "nanoid": "^5.0.0",
     "pino": "^9.2.0",
     "pino-pretty": "^11.2.0",
+    "socket.io": "^4.8.3",
     "zod": "^3.23.0"
   },
   "devDependencies": {

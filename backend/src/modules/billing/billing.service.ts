@@ -6,7 +6,8 @@ export interface SubmitPaymentInput {
   transactionId: string;
   amount: number;
   currency: string;
-  planId: 'pro' | 'business' | 'enterprise';
+  /** Plan key (references a dynamic Plan.key, e.g. 'starter', 'business') */
+  planId: string;
   notes?: string;
 }
 

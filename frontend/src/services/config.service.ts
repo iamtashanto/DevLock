@@ -4,11 +4,31 @@ export interface RemoteConfig {
   id: string;
   projectId: string;
   maintenance: boolean;
+  maintenanceMessage?: string;
   killSwitch: boolean;
   killSwitchReason?: string;
   notifications: ConfigNotification[];
   customConfig: Record<string, unknown>;
   updatedAt: string;
+}
+
+/**
+ * The API stores maintenance/killSwitch as nested `{ enabled, ... }` objects.
+ * Flatten them to booleans so the dashboard reads them correctly — an object is
+ * always truthy, which previously made the UI show "ACTIVATED" even when off.
+ */
+function normalizeConfig(raw: any): RemoteConfig {
+  return {
+    id: raw?._id ?? raw?.id ?? '',
+    projectId: raw?.projectId ?? '',
+    maintenance: raw?.maintenance?.enabled === true,
+    maintenanceMessage: raw?.maintenance?.message,
+    killSwitch: raw?.killSwitch?.enabled === true,
+    killSwitchReason: raw?.killSwitch?.reason,
+    notifications: Array.isArray(raw?.notifications) ? raw.notifications : [],
+    customConfig: raw?.customConfig ?? raw?.customData ?? {},
+    updatedAt: raw?.updatedAt ?? '',
+  };
 }
 
 export interface ConfigNotification {
@@ -46,24 +66,24 @@ export interface CreateFeatureFlagRequest {
 }
 
 export const configService = {
-  getConfig(projectId: string): Promise<RemoteConfig> {
-    return apiClient.get<RemoteConfig>(`/projects/${projectId}/config`);
+  async getConfig(projectId: string): Promise<RemoteConfig> {
+    return normalizeConfig(await apiClient.get(`/projects/${projectId}/config`));
   },
 
-  updateConfig(projectId: string, data: UpdateConfigRequest): Promise<RemoteConfig> {
-    return apiClient.put<RemoteConfig>(`/projects/${projectId}/config`, data);
+  async updateConfig(projectId: string, data: UpdateConfigRequest): Promise<RemoteConfig> {
+    return normalizeConfig(await apiClient.put(`/projects/${projectId}/config`, data));
   },
 
-  toggleMaintenance(projectId: string, enabled: boolean): Promise<RemoteConfig> {
-    return apiClient.post<RemoteConfig>(`/projects/${projectId}/config/maintenance`, { enabled });
+  async toggleMaintenance(projectId: string, enabled: boolean): Promise<RemoteConfig> {
+    return normalizeConfig(await apiClient.post(`/projects/${projectId}/config/maintenance`, { enabled }));
   },
 
-  activateKillSwitch(projectId: string, reason: string): Promise<RemoteConfig> {
-    return apiClient.post<RemoteConfig>(`/projects/${projectId}/config/kill-switch/activate`, { reason });
+  async activateKillSwitch(projectId: string, reason: string): Promise<RemoteConfig> {
+    return normalizeConfig(await apiClient.post(`/projects/${projectId}/config/kill-switch/activate`, { reason }));
   },
 
-  deactivateKillSwitch(projectId: string): Promise<RemoteConfig> {
-    return apiClient.post<RemoteConfig>(`/projects/${projectId}/config/kill-switch/deactivate`);
+  async deactivateKillSwitch(projectId: string): Promise<RemoteConfig> {
+    return normalizeConfig(await apiClient.post(`/projects/${projectId}/config/kill-switch/deactivate`));
   },
 
   // Feature Flags

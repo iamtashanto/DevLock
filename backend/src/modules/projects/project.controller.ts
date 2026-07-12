@@ -28,4 +28,23 @@ export class ProjectController {
     const result = await projectService.delete(req.auth!.orgId, req.params['projectId']!);
     res.json({ success: true, data: result });
   }
+
+  async listDomains(req: Request, res: Response): Promise<void> {
+    const domains = await projectService.listDomains(req.auth!.orgId, req.params['projectId']!);
+    res.json({ success: true, data: domains });
+  }
+
+  async addDomain(req: Request, res: Response): Promise<void> {
+    const domains = await projectService.addDomain(req.auth!.orgId, req.params['projectId']!, req.body.domain);
+    res.status(201).json({ success: true, data: domains });
+  }
+
+  async removeDomain(req: Request, res: Response): Promise<void> {
+    const domains = await projectService.removeDomain(
+      req.auth!.orgId,
+      req.params['projectId']!,
+      decodeURIComponent(req.params['domain']!),
+    );
+    res.json({ success: true, data: domains });
+  }
 }

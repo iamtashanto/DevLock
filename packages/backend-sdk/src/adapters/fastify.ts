@@ -64,7 +64,11 @@ export async function devlockPlugin(fastify: any, options: MiddlewareOptions): P
       domain: request.hostname,
     });
 
-    if (!result.valid) {
+    // Fail-open (default): an `'unknown'` result means DevLock was unreachable and
+    // no cached decision exists — never block the host's traffic on our outage.
+    // Definitive negatives (suspended/expired/revoked) still block.
+    const indeterminate = result.status === 'unknown' && !!result.error;
+    if (!indeterminate && !result.valid) {
       reply.code(403).send({ error: 'Invalid license', status: result.status });
       return;
     }

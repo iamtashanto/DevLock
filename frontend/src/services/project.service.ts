@@ -62,4 +62,17 @@ export const projectService = {
   rotateKeys(projectId: string): Promise<ProjectKeys> {
     return apiClient.post<ProjectKeys>(`/projects/${projectId}/rotate-keys`);
   },
+
+  // Allowed domains (returns the full updated list)
+  listDomains(projectId: string): Promise<string[]> {
+    return apiClient.get<string[]>(`/projects/${projectId}/domains`);
+  },
+
+  addDomain(projectId: string, domain: string): Promise<string[]> {
+    return apiClient.post<string[]>(`/projects/${projectId}/domains`, { domain });
+  },
+
+  removeDomain(projectId: string, domain: string): Promise<string[]> {
+    return apiClient.delete<string[]>(`/projects/${projectId}/domains/${encodeURIComponent(domain)}`);
+  },
 };

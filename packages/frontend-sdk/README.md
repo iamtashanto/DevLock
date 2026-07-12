@@ -239,10 +239,25 @@ The SDK automatically caches validation results and supports offline operation:
 
 ## Fail-open behavior
 
+> ### 🔒 The safety guarantee
+> **Your website locks ONLY when you explicitly lock it from the DevLock dashboard.**
+> A DevLock outage, a network/API error, a request timeout, a malformed response, or the
+> SDK itself failing will **never** lock, block, or crash your site. Errors always resolve
+> to *unlocked*. A lock is applied only when the server explicitly reports `enabled: true`
+> for a kill-switch or maintenance state that **you** turned on.
+
 DevLock is a safety layer for **your** app — it must never become a single point of
 failure. If DevLock's servers are unreachable and there is no usable cache, the SDK
 **does not throw and does not block rendering**. `init()` resolves in a permissive
 offline state and your application keeps running exactly as normal.
+
+Concretely, the SDK guarantees:
+
+- `init()` never rejects when `failBehavior` is `'open'` (the default).
+- Every server response is parsed defensively — missing or malformed fields can never
+  crash your app and can never flip the app into a locked state.
+- A kill-switch / maintenance lock requires an explicit `enabled === true` from the server.
+  Anything else (undefined, garbage, HTTP error, unreachable) is treated as unlocked.
 
 ```typescript
 const devlock = new DevLock({

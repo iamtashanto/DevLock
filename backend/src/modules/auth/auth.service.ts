@@ -130,6 +130,37 @@ export class AuthService {
     // TODO: Delete from sessions collection
   }
 
+  /**
+   * Update the current user's profile (currently: display name).
+   */
+  async updateProfile(userId: string, input: { name?: string }): Promise<{ id: string; name: string; email: string; role: string }> {
+    const update: Record<string, unknown> = {};
+    if (typeof input.name === 'string' && input.name.trim()) update['name'] = input.name.trim();
+
+    const user = await UserModel.findByIdAndUpdate(userId, update, { new: true }).lean();
+    if (!user) throw new NotFoundError('User not found');
+
+    return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
+  }
+
+  /**
+   * Change the current user's password after verifying the current one.
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    if (!newPassword || newPassword.length < 8) {
+      throw new AuthenticationError('New password must be at least 8 characters');
+    }
+
+    const user = await UserModel.findById(userId).select('+passwordHash');
+    if (!user) throw new NotFoundError('User not found');
+
+    const valid = await verifyPassword(currentPassword, user.passwordHash);
+    if (!valid) throw new AuthenticationError('Current password is incorrect');
+
+    user.passwordHash = await hashPassword(newPassword);
+    await user.save();
+  }
+
   // ── Private ──────────────────────────────────────────────────────────
 
   private generateTokens(userId: string, orgId: string, role: Role): AuthTokens {

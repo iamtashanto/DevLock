@@ -30,4 +30,12 @@ router.get('/me', authenticate, (req, res, next) => {
   controller.me(req, res).catch(next);
 });
 
+router.patch('/me', authenticate, (req, res, next) => {
+  controller.updateProfile(req, res).catch(next);
+});
+
+router.post('/change-password', authenticate, rateLimiter('auth'), (req, res, next) => {
+  controller.changePassword(req, res).catch(next);
+});
+
 export { router as authRoutes };

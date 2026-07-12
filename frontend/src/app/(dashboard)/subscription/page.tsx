@@ -15,17 +15,20 @@ interface Plan {
   _id: string;
   name: string;
   key: string;
+  description?: string;
   maxProjects: number;
-  monthlyPrice: number;
-  annualPrice: number;
+  price: number;
+  currency?: string;
   features: string[];
+  isPopular?: boolean;
 }
 
 export default function SubscriptionPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  
+
   // Payment form state
   const [method, setMethod] = useState('bkash');
   const [transactionId, setTransactionId] = useState('');
@@ -38,8 +41,12 @@ export default function SubscriptionPage() {
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get<Plan[]>('/plans');
-      setPlans(data || []);
+      const [plansData, org] = await Promise.all([
+        apiClient.get<Plan[]>('/plans'),
+        apiClient.get<{ plan?: string }>('/organizations').catch(() => null),
+      ]);
+      setPlans(plansData || []);
+      if (org?.plan) setCurrentPlan(org.plan);
     } catch (err) {
       console.error('Failed to fetch plans', err);
     } finally {
@@ -54,10 +61,10 @@ export default function SubscriptionPage() {
     try {
       setSubmitting(true);
       await apiClient.post('/billing/manual-payment', {
-        planId: selectedPlan._id,
+        planId: selectedPlan.key,
         method: method,
         transactionId: transactionId,
-        amount: selectedPlan.monthlyPrice,
+        amount: selectedPlan.price,
         currency: method === 'crypto' ? 'USDT' : 'BDT'
       });
       
@@ -89,22 +96,28 @@ export default function SubscriptionPage() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const isCurrent = plan.key === currentPlan;
+            return (
             <Card
               key={plan._id}
               className={`relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
-                plan.monthlyPrice > 0 ? 'border-primary/50 shadow-primary/10' : 'border-border'
+                isCurrent ? 'border-primary shadow-primary/20 ring-2 ring-primary/30' : plan.isPopular ? 'border-primary/50 shadow-primary/10' : 'border-border'
               }`}
             >
-              {plan.monthlyPrice > 0 && (
+              {isCurrent ? (
                 <div className="absolute top-0 right-0 rounded-bl-xl bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                  Current Plan
+                </div>
+              ) : plan.isPopular && (
+                <div className="absolute top-0 right-0 rounded-bl-xl bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
                   Popular
                 </div>
               )}
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-2xl font-bold uppercase tracking-wider">{plan.name}</CardTitle>
                 <div className="mt-4 flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold">${plan.monthlyPrice}</span>
+                  <span className="text-5xl font-extrabold">${plan.price}</span>
                   <span className="text-sm font-medium text-muted-foreground">/mo</span>
                 </div>
                 <CardDescription className="mt-2 text-sm text-muted-foreground font-medium">
@@ -123,17 +136,18 @@ export default function SubscriptionPage() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className={`w-full font-semibold ${
-                    plan.monthlyPrice > 0 ? 'bg-primary hover:bg-primary/90' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
+                  className="w-full font-semibold"
+                  variant={isCurrent ? 'outline' : 'default'}
                   size="lg"
+                  disabled={isCurrent || plan.price === 0}
                   onClick={() => setSelectedPlan(plan)}
                 >
-                  {plan.monthlyPrice > 0 ? 'Upgrade Now' : 'Current Plan'}
+                  {isCurrent ? 'Current Plan' : plan.price === 0 ? 'Free' : 'Upgrade Now'}
                 </Button>
               </CardFooter>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -142,7 +156,7 @@ export default function SubscriptionPage() {
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">Complete Your Payment</DialogTitle>
             <DialogDescription className="text-center">
-              You selected the <strong className="text-foreground">{selectedPlan?.name}</strong> plan (${selectedPlan?.monthlyPrice}/mo).
+              You selected the <strong className="text-foreground">{selectedPlan?.name}</strong> plan (${selectedPlan?.price}/mo).
             </DialogDescription>
           </DialogHeader>
 
@@ -153,7 +167,7 @@ export default function SubscriptionPage() {
                 Bkash / Nagad
               </h3>
               <p className="text-sm text-muted-foreground">
-                Send <strong>${selectedPlan?.monthlyPrice}</strong> (equivalent BDT) via Send Money to:
+                Send <strong>${selectedPlan?.price}</strong> (equivalent BDT) via Send Money to:
               </p>
               <div className="rounded-md bg-muted p-3 text-center text-xl font-mono tracking-wider font-bold text-primary">
                 01735677090
@@ -166,7 +180,7 @@ export default function SubscriptionPage() {
                 Crypto Payment (USDT/TRC20)
               </h3>
               <p className="text-sm text-muted-foreground">
-                Send exactly <strong>{selectedPlan?.monthlyPrice} USDT</strong> to the following address:
+                Send exactly <strong>{selectedPlan?.price} USDT</strong> to the following address:
               </p>
               <div className="rounded-md bg-muted p-3 text-center text-sm font-mono break-all text-primary">
                 [Your Crypto Wallet Address Here]

@@ -264,12 +264,23 @@ export class DevLock {
   private async syncConfig(): Promise<void> {
     try {
       const response = await this.http.get<{ success: boolean; data: { config: any } }>('/v1/sdk/config');
-      const data = response.data.config;
+      const data = response?.data?.config ?? {};
 
-      this.state.maintenance = data.maintenance ?? this.state.maintenance;
-      this.state.killSwitch = data.killSwitch ?? this.state.killSwitch;
-      this.state.apiSuspension = data.apiSuspension ?? this.state.apiSuspension;
-      this.state.featureFlags = data.featureFlags ?? this.state.featureFlags;
+      // SAFETY: a lock (kill-switch / maintenance / API suspension) is applied ONLY
+      // when the server explicitly sends `enabled === true`. Missing or malformed
+      // data can never lock the host service — it stays in its previous state.
+      this.state.maintenance = data.maintenance?.enabled === true
+        ? { enabled: true, message: data.maintenance.message }
+        : { enabled: false };
+      this.state.killSwitch = data.killSwitch?.enabled === true
+        ? { enabled: true, reason: data.killSwitch.reason }
+        : { enabled: false };
+      this.state.apiSuspension = data.apiSuspension?.enabled === true
+        ? { enabled: true, reason: data.apiSuspension.reason }
+        : { enabled: false };
+      this.state.featureFlags = (data.featureFlags && typeof data.featureFlags === 'object')
+        ? data.featureFlags
+        : this.state.featureFlags;
       if (data.version) {
         this.state.config = { version: data.version, data: data.customData ?? {} };
       }

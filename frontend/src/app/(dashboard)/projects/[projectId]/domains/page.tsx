@@ -1,21 +1,50 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { projectService } from '@/services/project.service';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/shared/status-badge';
+import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/shared/empty-state';
-import { Plus, Globe, ExternalLink } from 'lucide-react';
-
-// Placeholder data - would be fetched from API
-const MOCK_DOMAINS = [
-  { id: '1', domain: 'app.example.com', status: 'verified', addedAt: '2024-01-15' },
-  { id: '2', domain: 'staging.example.com', status: 'pending', addedAt: '2024-02-01' },
-];
+import { TableSkeleton } from '@/components/shared/loading-skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Plus, Globe, Trash2 } from 'lucide-react';
 
 export default function DomainsPage() {
   const params = useParams();
   const projectId = params.projectId as string;
+  const queryClient = useQueryClient();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newDomain, setNewDomain] = useState('');
+  const [error, setError] = useState('');
+
+  const { data: domains, isLoading } = useQuery({
+    queryKey: ['domains', projectId],
+    queryFn: () => projectService.listDomains(projectId),
+    enabled: !!projectId,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (domain: string) => projectService.addDomain(projectId, domain),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['domains', projectId] });
+      setCreateOpen(false);
+      setNewDomain('');
+      setError('');
+    },
+    onError: (err: any) => setError(err?.message || 'Failed to add domain'),
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (domain: string) => projectService.removeDomain(projectId, domain),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['domains', projectId] }),
+  });
+
+  if (isLoading) {
+    return <TableSkeleton rows={3} cols={2} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -23,46 +52,79 @@ export default function DomainsPage() {
         <div>
           <h2 className="text-lg font-semibold">Allowed Domains</h2>
           <p className="text-sm text-muted-foreground">
-            Domains authorized to validate licenses for this project
+            Domains authorized to validate licenses for this project. Leave empty to allow any domain.
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Domain
         </Button>
       </div>
 
-      {MOCK_DOMAINS.length === 0 ? (
+      {!domains?.length ? (
         <EmptyState
           icon={Globe}
           title="No domains configured"
-          description="Add domains that are authorized to validate licenses"
+          description="Add domains that are authorized to validate licenses. While empty, validation is allowed from any domain."
           actionLabel="Add Domain"
-          onAction={() => {}}
+          onAction={() => setCreateOpen(true)}
         />
       ) : (
         <div className="space-y-3">
-          {MOCK_DOMAINS.map((domain) => (
-            <Card key={domain.id}>
+          {domains.map((domain) => (
+            <Card key={domain}>
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                   <Globe className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">{domain.domain}</p>
-                    <p className="text-xs text-muted-foreground">Added {domain.addedAt}</p>
-                  </div>
+                  <p className="font-medium">{domain}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <StatusBadge status={domain.status} />
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => removeMutation.mutate(domain)}
+                  disabled={removeMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Add Domain Dialog */}
+      <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) setError(''); }}>
+        <DialogContent onClose={() => setCreateOpen(false)}>
+          <DialogHeader>
+            <DialogTitle>Add Allowed Domain</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            <Input
+              placeholder="app.example.com"
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && newDomain.trim()) addMutation.mutate(newDomain.trim()); }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter the hostname only — the protocol, port and path are stripped automatically.
+            </p>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => addMutation.mutate(newDomain.trim())}
+              loading={addMutation.isPending}
+              disabled={!newDomain.trim()}
+            >
+              Add
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

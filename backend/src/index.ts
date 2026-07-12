@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -82,6 +83,17 @@ async function bootstrap(): Promise<void> {
 
     // Start HTTP server
     const server = createServer(app);
+
+    // Real-time WebSocket gateway (fail-safe: if it can't start, the API still
+    // serves traffic — SDKs fall back to polling, so nothing breaks).
+    try {
+      const { createWebSocketServer } = await import('./websocket/server.js');
+      createWebSocketServer(server);
+      logger.info('WebSocket gateway initialised');
+    } catch (err) {
+      logger.warn({ err }, 'WebSocket gateway failed to start — real-time disabled, polling still works');
+    }
+
     server.listen(PORT, () => {
       logger.info({ port: PORT, env: process.env['NODE_ENV'] ?? 'development' }, 'API Gateway started');
     });

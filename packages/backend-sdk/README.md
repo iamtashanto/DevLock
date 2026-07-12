@@ -261,12 +261,21 @@ app.use(createMiddleware({
 
 ## Fail-open behavior
 
+> ### 🔒 The safety guarantee
+> **Your service is disabled ONLY when you explicitly lock it from the DevLock dashboard.**
+> A DevLock outage, a network/API error, a request timeout, a malformed response, or the
+> SDK itself failing will **never** block traffic, return 503/403, or crash your process.
+> Errors always resolve to *allow*. A block is applied only when the server explicitly
+> reports `enabled: true` for a kill-switch / maintenance / suspension **you** turned on.
+
 DevLock is a safety layer for **your** service — it must never become a single point of
 failure. If DevLock's servers are unreachable and there is no cached decision:
 
 - `init()` **never throws** (resolves in a permissive offline state).
 - The middleware **does not block traffic** — a request that can only be validated as
   `'unknown'` (server unreachable) is allowed through instead of returning `403`.
+- Lock flags are normalised — only an explicit `enabled === true` blocks; missing or
+  malformed config can never take your service down.
 
 ```typescript
 app.use(createMiddleware({

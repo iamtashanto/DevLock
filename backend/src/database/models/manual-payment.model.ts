@@ -7,7 +7,8 @@ export interface IManualPaymentDocument extends Document {
   transactionId: string;
   amount: number;
   currency: string;
-  planId: 'pro' | 'business' | 'enterprise';
+  /** Plan key (references a dynamic Plan.key, e.g. 'starter', 'business') */
+  planId: string;
   status: 'pending' | 'approved' | 'rejected';
   notes?: string;
   createdAt: Date;
@@ -22,7 +23,7 @@ const manualPaymentSchema = new Schema<IManualPaymentDocument>(
     transactionId: { type: String, required: true, trim: true },
     amount: { type: Number, required: true },
     currency: { type: String, required: true, default: 'BDT' },
-    planId: { type: String, enum: ['pro', 'business', 'enterprise'], required: true },
+    planId: { type: String, required: true, lowercase: true, trim: true },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     notes: { type: String, trim: true },
   },

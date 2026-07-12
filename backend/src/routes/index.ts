@@ -73,8 +73,20 @@ export function createRoutes(): Router {
   });
 
   // Feature Flags
-  router.get('/projects/:projectId/flags', authenticate, authorize('config:read'), (_req, res) => {
-    res.json({ success: true, data: [] });
+  router.get('/projects/:projectId/flags', authenticate, authorize('config:read'), (req, res, next) => {
+    configController.listFlags(req, res).catch(next);
+  });
+
+  router.post('/projects/:projectId/flags', authenticate, authorize('config:update'), (req, res, next) => {
+    configController.createFlag(req, res).catch(next);
+  });
+
+  router.patch('/projects/:projectId/flags/:flagId', authenticate, authorize('config:update'), (req, res, next) => {
+    configController.toggleFlag(req, res).catch(next);
+  });
+
+  router.delete('/projects/:projectId/flags/:flagId', authenticate, authorize('config:update'), (req, res, next) => {
+    configController.deleteFlag(req, res).catch(next);
   });
 
   // Audit Logs

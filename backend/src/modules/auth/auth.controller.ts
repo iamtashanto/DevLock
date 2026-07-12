@@ -56,7 +56,19 @@ export class AuthController {
         role: req.auth!.role,
         permissions: req.auth!.permissions,
         isSuperAdmin: user?.isSuperAdmin || false,
+        name: user?.name,
+        email: user?.email,
       },
     });
+  }
+
+  async updateProfile(req: Request, res: Response): Promise<void> {
+    const data = await authService.updateProfile(req.auth!.sub, req.body);
+    res.json({ success: true, data });
+  }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    await authService.changePassword(req.auth!.sub, req.body.currentPassword, req.body.newPassword);
+    res.json({ success: true, data: { message: 'Password changed successfully' } });
   }
 }

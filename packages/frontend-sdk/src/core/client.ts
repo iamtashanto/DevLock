@@ -281,7 +281,15 @@ export class DevLock {
       throw new DevLockError(`Validation failed: HTTP ${response.status}`, 'VALIDATION_HTTP_ERROR');
     }
 
-    const result = (await response.json()) as { success: boolean; data: ValidationResponse };
+    const result = (await response.json()) as { success?: boolean; data?: ValidationResponse };
+
+    // Treat a malformed / unsuccessful body as a *transient* failure (→ fail-open),
+    // never as a definitive "invalid license". Only a well-formed success response
+    // is allowed to change lock/license state.
+    if (!result || result.success !== true || !result.data) {
+      throw new DevLockError('Malformed validation response', 'VALIDATION_BAD_SHAPE');
+    }
+
     this.applyValidation(result.data);
 
     // Cache for offline use
@@ -295,46 +303,60 @@ export class DevLock {
   }
 
   private applyValidation(data: ValidationResponse): void {
+    // SAFETY: every field is read defensively. A missing/partial/malformed
+    // response must never crash the host app, and — critically — must never put
+    // the app into a locked state. A lock (kill-switch / maintenance) is applied
+    // ONLY when the server explicitly sends `enabled === true`. Anything else
+    // (undefined, garbage, error) resolves to "unlocked".
+    const license = data?.license ?? ({} as ValidationResponse['license']);
+    const cfg = data?.config ?? ({} as ValidationResponse['config']);
+
     // License
     this.state.license = {
-      valid: data.valid,
-      status: data.license.status as LicenseInfo['status'],
-      features: data.license.features,
-      expiresAt: data.license.expiresAt,
+      valid: data?.valid === true,
+      status: (license.status as LicenseInfo['status']) ?? 'none',
+      features: Array.isArray(license.features) ? license.features : [],
+      expiresAt: license.expiresAt,
     };
 
-    // Config
-    this.state.maintenance = data.config.maintenance;
-    this.state.killSwitch = data.config.killSwitch;
-    this.state.notifications = data.config.notifications;
-    this.state.featureFlags = data.config.featureFlags;
+    // Config — locks require an explicit boolean `true`
+    this.state.maintenance = cfg.maintenance?.enabled === true
+      ? cfg.maintenance
+      : { enabled: false };
+    this.state.killSwitch = cfg.killSwitch?.enabled === true
+      ? cfg.killSwitch
+      : { enabled: false };
+    this.state.notifications = Array.isArray(cfg.notifications) ? cfg.notifications : [];
+    this.state.featureFlags = (cfg.featureFlags && typeof cfg.featureFlags === 'object')
+      ? cfg.featureFlags
+      : {};
 
     // Popup
-    if (data.popup) {
+    if (data?.popup) {
       this.state.popup = data.popup;
       this.emitter.emit('popup:show', data.popup);
     }
 
     // Watermark
-    if (this.config.watermark && !data.valid) {
+    if (this.config.watermark && !this.state.license.valid) {
       this.watermark.show(this.config.watermarkText);
     } else {
       this.watermark.hide();
     }
 
-    // Emit events based on state
-    if (data.valid) {
+    // Emit events based on the (already sanitised) state
+    if (this.state.license.valid) {
       this.emitter.emit('license:valid', this.state.license);
     } else {
       this.emitter.emit('license:invalid', this.state.license.status);
     }
 
-    if (data.config.maintenance.enabled) {
-      this.emitter.emit('maintenance:enabled', data.config.maintenance);
+    if (this.state.maintenance.enabled) {
+      this.emitter.emit('maintenance:enabled', this.state.maintenance);
     }
 
-    if (data.config.killSwitch.enabled) {
-      this.emitter.emit('killswitch:activated', data.config.killSwitch);
+    if (this.state.killSwitch.enabled) {
+      this.emitter.emit('killswitch:activated', this.state.killSwitch);
     }
   }
 

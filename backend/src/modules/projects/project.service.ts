@@ -76,6 +76,36 @@ export class ProjectService {
     return this.mapProject(project);
   }
 
+  async listDomains(tenantId: string, projectId: string): Promise<string[]> {
+    const project = await this.getById(tenantId, projectId);
+    return project.allowedDomains ?? [];
+  }
+
+  async addDomain(tenantId: string, projectId: string, domain: string): Promise<string[]> {
+    const normalized = normalizeDomain(domain);
+    if (!normalized) throw new NotFoundError('A valid domain is required');
+
+    const project = await ProjectModel.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(projectId), tenantId: new mongoose.Types.ObjectId(tenantId) },
+      { $addToSet: { allowedDomains: normalized } },
+      { new: true },
+    ).lean();
+
+    if (!project) throw new NotFoundError('Project not found');
+    return project.allowedDomains ?? [];
+  }
+
+  async removeDomain(tenantId: string, projectId: string, domain: string): Promise<string[]> {
+    const project = await ProjectModel.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(projectId), tenantId: new mongoose.Types.ObjectId(tenantId) },
+      { $pull: { allowedDomains: normalizeDomain(domain) } },
+      { new: true },
+    ).lean();
+
+    if (!project) throw new NotFoundError('Project not found');
+    return project.allowedDomains ?? [];
+  }
+
   async delete(tenantId: string, projectId: string) {
     const project = await ProjectModel.findOneAndDelete({
       _id: new mongoose.Types.ObjectId(projectId),
@@ -99,4 +129,19 @@ export class ProjectService {
       updatedAt: doc.updatedAt?.toISOString(),
     };
   }
+}
+
+/**
+ * Normalise a user-supplied domain: strip protocol, path, port and whitespace,
+ * lowercase it. Returns '' if nothing usable remains.
+ */
+function normalizeDomain(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '')
+    .replace(/:\d+$/, '')
+    .trim();
 }

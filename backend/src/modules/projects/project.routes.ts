@@ -28,4 +28,17 @@ router.delete('/:projectId', authorize('project:delete'), (req, res, next) => {
   controller.delete(req, res).catch(next);
 });
 
+// Allowed domains
+router.get('/:projectId/domains', authorize('project:read'), (req, res, next) => {
+  controller.listDomains(req, res).catch(next);
+});
+
+router.post('/:projectId/domains', authorize('project:update'), (req, res, next) => {
+  controller.addDomain(req, res).catch(next);
+});
+
+router.delete('/:projectId/domains/:domain', authorize('project:update'), (req, res, next) => {
+  controller.removeDomain(req, res).catch(next);
+});
+
 export { router as projectRoutes };

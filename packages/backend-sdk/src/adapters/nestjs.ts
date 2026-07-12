@@ -131,7 +131,11 @@ export class DevLockGuard {
       domain: request.hostname,
     });
 
-    if (!result.valid) {
+    // Fail-open (default): an `'unknown'` result means DevLock was unreachable and
+    // no cached decision exists — never block the host's traffic on our outage.
+    // Definitive negatives (suspended/expired/revoked) still block.
+    const indeterminate = result.status === 'unknown' && !!result.error;
+    if (!indeterminate && !result.valid) {
       response.status(403).json({ error: 'Invalid license', status: result.status });
       return false;
     }

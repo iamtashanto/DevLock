@@ -96,6 +96,14 @@ export const authService = {
     return apiClient.get<User>('/auth/me');
   },
 
+  updateProfile(data: { name: string }): Promise<{ id: string; name: string; email: string; role: string }> {
+    return apiClient.patch('/auth/me', data);
+  },
+
+  changePassword(data: { currentPassword: string; newPassword: string }): Promise<{ message: string }> {
+    return apiClient.post('/auth/change-password', data);
+  },
+
   forgotPassword(email: string): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>('/auth/forgot-password', { email });
   },

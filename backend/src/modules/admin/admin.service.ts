@@ -1,6 +1,19 @@
 import { ManualPaymentModel, TenantModel, ProjectModel, UserModel, LicenseModel } from '@/database';
 import mongoose from 'mongoose';
 import os from 'os';
+import { randomUUID } from 'crypto';
+import { emitTenantEvent } from '../../core/events/index.js';
+
+function notify(tenantId: string, type: 'info' | 'success' | 'warning' | 'error', title: string, message: string) {
+  return emitTenantEvent(tenantId, 'notification', {
+    id: randomUUID(),
+    title,
+    message,
+    type,
+    read: false,
+    createdAt: new Date().toISOString(),
+  });
+}
 
 export class AdminService {
   async getDashboardStats() {
@@ -38,6 +51,13 @@ export class AdminService {
       'billing.paymentStatus': 'active'
     });
 
+    await notify(
+      payment.tenantId.toString(),
+      'success',
+      'Payment approved',
+      `Your payment was approved and your plan is now "${payment.planId}".`,
+    );
+
     return payment;
   }
 
@@ -48,6 +68,13 @@ export class AdminService {
 
     payment.status = 'rejected';
     await payment.save();
+
+    await notify(
+      payment.tenantId.toString(),
+      'warning',
+      'Payment rejected',
+      `Your payment (txn ${payment.transactionId}) could not be verified. Please check the details and try again.`,
+    );
 
     return payment;
   }

@@ -3,6 +3,7 @@ import { LicenseModel, ProjectModel, ConfigModel } from '@/database';
 import { generateLicenseKey, encrypt } from '@/encryption';
 import { createLogger } from '@/logger';
 import { NotFoundError, ForbiddenError, ConflictError } from '../../core/errors/index.js';
+import { emitProjectEvent } from '../../core/events/index.js';
 
 const logger = createLogger({ service: 'license-service' });
 
@@ -171,6 +172,8 @@ export class LicenseService {
 
     logger.info({ licenseId, reason }, 'License suspended');
 
+    await emitProjectEvent('license:suspended', projectId, { licenseId, reason });
+
     return { id: licenseId, status: 'suspended', suspendedAt: license.suspendedAt.toISOString() };
   }
 
@@ -188,6 +191,8 @@ export class LicenseService {
 
     logger.info({ licenseId, reason }, 'License revoked');
 
+    await emitProjectEvent('license:revoked', projectId, { licenseId, reason });
+
     return { id: licenseId, status: 'revoked', revokedAt: license.revokedAt.toISOString() };
   }
 
@@ -204,6 +209,8 @@ export class LicenseService {
     await license.save();
 
     logger.info({ licenseId }, 'License reactivated');
+
+    await emitProjectEvent('license:renewed', projectId, { licenseId });
 
     return { id: licenseId, status: 'active' };
   }
