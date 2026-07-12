@@ -33,7 +33,7 @@ export class LicenseService {
    */
   async create(orgId: string, projectId: string, input: CreateLicenseInput) {
     // Verify project belongs to org
-    const project = await ProjectModel.findOne({ _id: projectId, orgId });
+    const project = await ProjectModel.findOne({ _id: projectId, tenantId: orgId });
     if (!project) throw new NotFoundError('Project not found');
 
     // Generate license key
@@ -41,7 +41,7 @@ export class LicenseService {
     const keyHash = createHash('sha256').update(key).digest('hex');
 
     const license = await LicenseModel.create({
-      orgId,
+      tenantId: orgId,
       projectId,
       key: encrypt(key, process.env['ENCRYPTION_KEY'] ?? ''),
       keyHash,
@@ -80,10 +80,10 @@ export class LicenseService {
    */
   async list(orgId: string, projectId: string, query: ListLicensesQuery) {
     // Verify project access
-    const project = await ProjectModel.findOne({ _id: projectId, orgId });
+    const project = await ProjectModel.findOne({ _id: projectId, tenantId: orgId });
     if (!project) throw new NotFoundError('Project not found');
 
-    const filter: Record<string, unknown> = { orgId, projectId };
+    const filter: Record<string, unknown> = { tenantId: orgId, projectId };
     if (query.status) filter['status'] = query.status;
     if (query.type) filter['type'] = query.type;
     if (query.search) {
@@ -130,7 +130,7 @@ export class LicenseService {
    * Get a single license by ID.
    */
   async getById(orgId: string, projectId: string, licenseId: string) {
-    const license = await LicenseModel.findOne({ _id: licenseId, orgId, projectId })
+    const license = await LicenseModel.findOne({ _id: licenseId, tenantId: orgId, projectId })
       .select('-key -keyHash')
       .lean();
 
@@ -160,7 +160,7 @@ export class LicenseService {
    * Suspend a license.
    */
   async suspend(orgId: string, projectId: string, licenseId: string, reason: string) {
-    const license = await LicenseModel.findOne({ _id: licenseId, orgId, projectId });
+    const license = await LicenseModel.findOne({ _id: licenseId, tenantId: orgId, projectId });
     if (!license) throw new NotFoundError('License not found');
     if (license.status === 'revoked') throw new ConflictError('Cannot suspend a revoked license');
     if (license.status === 'suspended') throw new ConflictError('License is already suspended');
@@ -181,7 +181,7 @@ export class LicenseService {
    * Revoke a license permanently.
    */
   async revoke(orgId: string, projectId: string, licenseId: string, reason: string) {
-    const license = await LicenseModel.findOne({ _id: licenseId, orgId, projectId });
+    const license = await LicenseModel.findOne({ _id: licenseId, tenantId: orgId, projectId });
     if (!license) throw new NotFoundError('License not found');
     if (license.status === 'revoked') throw new ConflictError('License is already revoked');
 
@@ -200,7 +200,7 @@ export class LicenseService {
    * Reactivate a suspended license.
    */
   async reactivate(orgId: string, projectId: string, licenseId: string) {
-    const license = await LicenseModel.findOne({ _id: licenseId, orgId, projectId });
+    const license = await LicenseModel.findOne({ _id: licenseId, tenantId: orgId, projectId });
     if (!license) throw new NotFoundError('License not found');
     if (license.status !== 'suspended') throw new ConflictError('Only suspended licenses can be reactivated');
 

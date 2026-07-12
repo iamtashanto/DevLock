@@ -28,6 +28,10 @@ router.delete('/:projectId', authorize('project:delete'), (req, res, next) => {
   controller.delete(req, res).catch(next);
 });
 
+router.post('/:projectId/rotate-keys', authorize('project:rotate_keys'), (req, res, next) => {
+  controller.rotateKeys(req, res).catch(next);
+});
+
 // Allowed domains
 router.get('/:projectId/domains', authorize('project:read'), (req, res, next) => {
   controller.listDomains(req, res).catch(next);

@@ -54,30 +54,75 @@ export interface LicenseListParams {
   search?: string;
 }
 
+/**
+ * The API represents a license with `customerName`/`customerEmail`/`maxActivations`/
+ * `currentActivations`; the dashboard uses `holder`/`maxDevices`/`currentDevices`.
+ * Map between the two shapes here so the pages stay simple.
+ */
+function mapLicense(l: any): License {
+  return {
+    id: l?.id ?? l?._id ?? '',
+    key: l?.key ?? '',
+    projectId: l?.projectId ?? '',
+    status: l?.status,
+    type: l?.type,
+    holder: { name: l?.customerName ?? '', email: l?.customerEmail ?? '', company: l?.company },
+    maxDevices: l?.maxActivations ?? 0,
+    currentDevices: l?.currentActivations ?? 0,
+    maxDomains: l?.maxDomains ?? 0,
+    features: Array.isArray(l?.features) ? l.features : [],
+    metadata: l?.metadata,
+    expiresAt: l?.expiresAt ?? null,
+    lastValidatedAt: l?.lastValidatedAt ?? null,
+    createdAt: l?.createdAt ?? '',
+    updatedAt: l?.updatedAt ?? l?.createdAt ?? '',
+  };
+}
+
 export const licenseService = {
-  list(projectId: string, params?: LicenseListParams): Promise<LicenseListResponse> {
-    return apiClient.get<LicenseListResponse>(`/projects/${projectId}/licenses`, {
+  async list(projectId: string, params?: LicenseListParams): Promise<LicenseListResponse> {
+    const res = await apiClient.get<any>(`/projects/${projectId}/licenses`, {
       params: params as unknown as Record<string, string | number | boolean | undefined>,
     });
+    const arr = Array.isArray(res) ? res : (res?.data ?? res?.licenses ?? []);
+    return {
+      licenses: arr.map(mapLicense),
+      total: arr.length,
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 20,
+    };
   },
 
-  getById(projectId: string, licenseId: string): Promise<License> {
-    return apiClient.get<License>(`/projects/${projectId}/licenses/${licenseId}`);
+  async getById(projectId: string, licenseId: string): Promise<License> {
+    return mapLicense(await apiClient.get<any>(`/projects/${projectId}/licenses/${licenseId}`));
   },
 
-  create(projectId: string, data: CreateLicenseRequest): Promise<License> {
-    return apiClient.post<License>(`/projects/${projectId}/licenses`, data);
+  async create(projectId: string, data: CreateLicenseRequest): Promise<License> {
+    const payload = {
+      type: data.type,
+      maxActivations: data.maxDevices ?? 1,
+      customerName: data.holder.name || undefined,
+      customerEmail: data.holder.email || undefined,
+      expiresAt: data.expiresAt,
+      features: data.features ?? [],
+      metadata: data.metadata ?? {},
+    };
+    return mapLicense(await apiClient.post<any>(`/projects/${projectId}/licenses`, payload));
   },
 
-  suspend(projectId: string, licenseId: string, reason?: string): Promise<License> {
-    return apiClient.post<License>(`/projects/${projectId}/licenses/${licenseId}/suspend`, { reason });
+  async suspend(projectId: string, licenseId: string, reason?: string): Promise<License> {
+    return mapLicense(await apiClient.post<any>(`/projects/${projectId}/licenses/${licenseId}/suspend`, {
+      reason: reason || 'Suspended from dashboard',
+    }));
   },
 
-  revoke(projectId: string, licenseId: string, reason?: string): Promise<License> {
-    return apiClient.post<License>(`/projects/${projectId}/licenses/${licenseId}/revoke`, { reason });
+  async revoke(projectId: string, licenseId: string, reason?: string): Promise<License> {
+    return mapLicense(await apiClient.post<any>(`/projects/${projectId}/licenses/${licenseId}/revoke`, {
+      reason: reason || 'Revoked from dashboard',
+    }));
   },
 
-  reactivate(projectId: string, licenseId: string): Promise<License> {
-    return apiClient.post<License>(`/projects/${projectId}/licenses/${licenseId}/reactivate`);
+  async reactivate(projectId: string, licenseId: string): Promise<License> {
+    return mapLicense(await apiClient.post<any>(`/projects/${projectId}/licenses/${licenseId}/reactivate`));
   },
 };

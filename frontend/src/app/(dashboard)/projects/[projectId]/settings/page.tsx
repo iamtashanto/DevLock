@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { projectService } from '@/services/project.service';
@@ -35,12 +35,12 @@ export default function ProjectSettingsPage() {
   const [description, setDescription] = useState('');
 
   // Initialize form when project loads
-  useState(() => {
+  useEffect(() => {
     if (project) {
       setName(project.name);
       setDescription(project.description || '');
     }
-  });
+  }, [project]);
 
   const updateMutation = useMutation({
     mutationFn: () => projectService.update(projectId, { name, description }),
@@ -81,7 +81,7 @@ export default function ProjectSettingsPage() {
             <Label htmlFor="project-name">Project Name</Label>
             <Input
               id="project-name"
-              value={name || project?.name || ''}
+              value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
@@ -89,7 +89,7 @@ export default function ProjectSettingsPage() {
             <Label htmlFor="project-desc">Description</Label>
             <Textarea
               id="project-desc"
-              value={description || project?.description || ''}
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="A brief description of your project"
             />

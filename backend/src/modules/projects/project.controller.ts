@@ -29,6 +29,11 @@ export class ProjectController {
     res.json({ success: true, data: result });
   }
 
+  async rotateKeys(req: Request, res: Response): Promise<void> {
+    const keys = await projectService.rotateKeys(req.auth!.orgId, req.params['projectId']!);
+    res.json({ success: true, data: keys });
+  }
+
   async listDomains(req: Request, res: Response): Promise<void> {
     const domains = await projectService.listDomains(req.auth!.orgId, req.params['projectId']!);
     res.json({ success: true, data: domains });

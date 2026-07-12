@@ -32,7 +32,7 @@ export default function LicensesPage() {
   const [createData, setCreateData] = useState({
     holderName: '',
     holderEmail: '',
-    type: 'node',
+    type: 'perpetual',
     maxDevices: 1,
     expiresAt: '',
   });
@@ -225,6 +225,104 @@ export default function LicensesPage() {
           </TableBody>
         </Table>
       )}
+
+      {/* Create License Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent onClose={() => setIsCreateOpen(false)}>
+          <DialogHeader>
+            <DialogTitle>Create License</DialogTitle>
+            <DialogDescription>
+              Generate a new license key for this project. The key is shown once after creation.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateLicense} className="space-y-4 py-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="holder-name">Customer Name</Label>
+                <Input
+                  id="holder-name"
+                  value={createData.holderName}
+                  onChange={(e) => setCreateData({ ...createData, holderName: e.target.value })}
+                  placeholder="Acme Inc."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="holder-email">Customer Email</Label>
+                <Input
+                  id="holder-email"
+                  type="email"
+                  value={createData.holderEmail}
+                  onChange={(e) => setCreateData({ ...createData, holderEmail: e.target.value })}
+                  placeholder="billing@acme.com"
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="license-type">Type</Label>
+                <Select
+                  id="license-type"
+                  value={createData.type}
+                  onChange={(e) => setCreateData({ ...createData, type: e.target.value })}
+                >
+                  <option value="perpetual">Perpetual</option>
+                  <option value="subscription">Subscription</option>
+                  <option value="trial">Trial</option>
+                  <option value="floating">Floating</option>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="max-devices">Max Devices</Label>
+                <Input
+                  id="max-devices"
+                  type="number"
+                  min={1}
+                  value={createData.maxDevices}
+                  onChange={(e) => setCreateData({ ...createData, maxDevices: Number(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="expires-at">Expiry Date (optional)</Label>
+              <Input
+                id="expires-at"
+                type="date"
+                value={createData.expiresAt}
+                onChange={(e) => setCreateData({ ...createData, expiresAt: e.target.value })}
+              />
+            </div>
+            {createError && <p className="text-sm text-destructive">{createError}</p>}
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" loading={createMutation.isPending}>
+                Create License
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suspend / Revoke Confirmation */}
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => { if (!open) setConfirmAction(null); }}
+        title={confirmAction?.type === 'revoke' ? 'Revoke License' : 'Suspend License'}
+        description={
+          confirmAction?.type === 'revoke'
+            ? 'This permanently revokes the license. The client will immediately fail validation and it cannot be reactivated. Continue?'
+            : 'This suspends the license. The client will fail validation until you reactivate it. Continue?'
+        }
+        confirmLabel={confirmAction?.type === 'revoke' ? 'Revoke' : 'Suspend'}
+        variant="destructive"
+        loading={suspendMutation.isPending || revokeMutation.isPending}
+        onConfirm={() => {
+          if (!confirmAction) return;
+          if (confirmAction.type === 'revoke') revokeMutation.mutate(confirmAction.licenseId);
+          else suspendMutation.mutate(confirmAction.licenseId);
+        }}
+      />
     </div>
   );
 }

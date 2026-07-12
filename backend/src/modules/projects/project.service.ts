@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { ProjectModel, TenantModel, PlanModel, type IProjectDocument } from '@/database';
+import { ProjectModel, TenantModel, PlanModel, LicenseModel, type IProjectDocument } from '@/database';
 import mongoose from 'mongoose';
 import { NotFoundError } from '../../core/errors/index.js';
 
@@ -22,7 +22,26 @@ export class ProjectService {
       .sort({ createdAt: -1 })
       .lean();
 
-    return projects.map(this.mapProject);
+    // Attach license counts per project in a single aggregation.
+    const ids = projects.map((p) => p._id);
+    const counts = ids.length
+      ? await LicenseModel.aggregate([
+          { $match: { projectId: { $in: ids } } },
+          {
+            $group: {
+              _id: '$projectId',
+              total: { $sum: 1 },
+              active: { $sum: { $cond: [{ $in: ['$status', ['active', 'trial']] }, 1, 0] } },
+            },
+          },
+        ])
+      : [];
+    const byId = new Map(counts.map((c: any) => [c._id.toString(), c]));
+
+    return projects.map((p) => {
+      const c = byId.get(p._id.toString());
+      return { ...this.mapProject(p), totalLicenses: c?.total ?? 0, activeLicenses: c?.active ?? 0 };
+    });
   }
 
   async getById(tenantId: string, projectId: string) {
@@ -74,6 +93,20 @@ export class ProjectService {
 
     if (!project) throw new NotFoundError('Project not found');
     return this.mapProject(project);
+  }
+
+  async rotateKeys(tenantId: string, projectId: string): Promise<{ apiKey: string; secretKey: string }> {
+    const publicKey = `pk_live_${randomBytes(16).toString('hex')}`;
+    const secretKey = `sk_live_${randomBytes(24).toString('hex')}`;
+
+    const project = await ProjectModel.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(projectId), tenantId: new mongoose.Types.ObjectId(tenantId) },
+      { $set: { publicKey, secretKey } },
+      { new: true },
+    ).lean();
+
+    if (!project) throw new NotFoundError('Project not found');
+    return { apiKey: publicKey, secretKey };
   }
 
   async listDomains(tenantId: string, projectId: string): Promise<string[]> {

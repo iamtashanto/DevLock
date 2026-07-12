@@ -7,7 +7,7 @@ export class AnalyticsService {
     
     // Aggregation for licenses
     const licenseStats = await LicenseModel.aggregate([
-      { $match: { orgId: new mongoose.Types.ObjectId(orgId) } },
+      { $match: { tenantId: new mongoose.Types.ObjectId(orgId) } },
       {
         $group: {
           _id: null,
@@ -51,7 +51,7 @@ export class AnalyticsService {
   }
 
   async getLicenseStats(orgId: string, projectId?: string) {
-    const matchQuery: any = { orgId: new mongoose.Types.ObjectId(orgId) };
+    const matchQuery: any = { tenantId: new mongoose.Types.ObjectId(orgId) };
     if (projectId) {
       matchQuery.projectId = new mongoose.Types.ObjectId(projectId);
     }
@@ -94,6 +94,47 @@ export class AnalyticsService {
       byType,
       createdOverTime: [], // Time series mock since it's complex to map cleanly from purely Mongo without timeseries
       expiringThisMonth,
+    };
+  }
+
+  async getProjectAnalytics(orgId: string, projectId: string) {
+    const match = {
+      tenantId: new mongoose.Types.ObjectId(orgId),
+      projectId: new mongoose.Types.ObjectId(projectId),
+    };
+
+    const agg = await LicenseModel.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $in: ['$status', ['active', 'trial']] }, 1, 0] } },
+          validations: { $sum: '$totalValidations' },
+        },
+      },
+    ]);
+    const s = agg[0] || { total: 0, active: 0, validations: 0 };
+
+    const top = await LicenseModel.find(match)
+      .sort({ totalValidations: -1 })
+      .limit(5)
+      .lean();
+
+    return {
+      projectId,
+      totalLicenses: s.total,
+      activeLicenses: s.active,
+      totalValidations: s.validations,
+      validationsToday: 0,
+      validationsThisWeek: 0,
+      validationsThisMonth: 0,
+      validationsByDay: [] as { date: string; count: number }[],
+      topLicenses: top.map((l: any) => ({
+        licenseId: l._id.toString(),
+        holder: l.customerName || l.customerEmail || 'Unknown',
+        validations: l.totalValidations || 0,
+      })),
     };
   }
 }

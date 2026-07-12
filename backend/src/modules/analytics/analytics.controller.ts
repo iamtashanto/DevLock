@@ -24,7 +24,7 @@ export class AnalyticsController {
   }
 
   async getProjectAnalytics(req: Request, res: Response): Promise<void> {
-    const data = await analyticsService.getOverview(req.auth!.orgId);
-    res.json({ success: true, data: { ...data, projectId: req.params['projectId'] } });
+    const data = await analyticsService.getProjectAnalytics(req.auth!.orgId, req.params['projectId']!);
+    res.json({ success: true, data });
   }
 }
