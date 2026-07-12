@@ -70,6 +70,8 @@ export function DevLockProvider({ config, children, fallback, onError }: DevLock
         onKillSwitchEnd: () => { setState((s) => ({ ...s, killSwitch: { enabled: false } })); config.on?.onKillSwitchEnd?.(); },
         onFeatureToggle: (f, e) => { setState((s) => ({ ...s, featureFlags: { ...s.featureFlags, [f]: e } })); config.on?.onFeatureToggle?.(f, e); },
         onConnectionChange: (c) => { setState((s) => ({ ...s, connected: c })); config.on?.onConnectionChange?.(c); },
+        onNotification: (notif) => { setState((s) => ({ ...s, notifications: [...s.notifications, notif] })); config.on?.onNotification?.(notif); },
+        onPopup: (popup) => { setState((s) => ({ ...s, popup })); config.on?.onPopup?.(popup); },
       },
     });
 

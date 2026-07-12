@@ -53,6 +53,8 @@ export const DevLockPlugin: Plugin = {
         onConnectionChange: (c) => { state.value.connected = c; },
         onMaintenanceMode: (c) => { state.value.maintenance = c; },
         onKillSwitch: (r) => { state.value.killSwitch = { enabled: true, reason: r }; },
+        onNotification: (notif) => { state.value.notifications.push(notif); },
+        onPopup: (popup) => { state.value.popup = popup; },
       },
     });
 
