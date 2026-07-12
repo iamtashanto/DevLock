@@ -4,7 +4,7 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    const url = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:6000';
+    const url = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:6002';
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
     socket = io(url, {

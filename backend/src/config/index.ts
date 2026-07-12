@@ -49,7 +49,7 @@ const encryptionEnvSchema = z.object({
 // ─── Service URLs ─────────────────────────────────────────────────────────────
 
 const serviceUrlsSchema = z.object({
-  API_GATEWAY_URL: z.string().url().default('http://localhost:6000'),
+  API_GATEWAY_URL: z.string().url().default('http://localhost:6002'),
   WEBSOCKET_URL: z.string().default('ws://localhost:3010'),
   DASHBOARD_URL: z.string().url().default('http://localhost:6001'),
 });
