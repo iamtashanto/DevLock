@@ -59,7 +59,7 @@ export class DevLock {
       secretKey: config.secretKey,
       projectId: config.projectId,
       apiUrl: config.apiUrl ?? DEFAULT_API,
-      wsUrl: config.wsUrl ?? DEFAULT_WS,
+      wsUrl: config.wsUrl ?? (config.apiUrl ? config.apiUrl.replace(/^http/, 'ws') : DEFAULT_WS),
       environment: config.environment ?? 'production',
       syncInterval: config.syncInterval ?? DEFAULT_SYNC_INTERVAL,
       cacheTtl: config.cacheTtl ?? DEFAULT_CACHE_TTL,

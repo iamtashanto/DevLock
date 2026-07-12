@@ -60,7 +60,7 @@ export class DevLock {
       projectKey: config.projectKey,
       licenseKey: config.licenseKey ?? '',
       apiUrl: config.apiUrl ?? DEFAULT_API,
-      wsUrl: config.wsUrl ?? DEFAULT_WS,
+      wsUrl: config.wsUrl ?? (config.apiUrl ? config.apiUrl.replace(/^http/, 'ws') : DEFAULT_WS),
       environment: config.environment ?? 'production',
       debug: config.debug ?? false,
       offlineGraceHours: config.offlineGraceHours ?? DEFAULT_GRACE_HOURS,
