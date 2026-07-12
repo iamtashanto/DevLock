@@ -273,6 +273,13 @@ Enforcement signals (kill-switch, suspension, maintenance) are still delivered a
 **cached** — once received they persist across reloads, so an offline period cannot be
 used to bypass a lock that was already issued.
 
+## Local Development & Testing
+
+When you integrate the SDK into a local project (e.g., `http://localhost:3000`), you can test it directly against your production DevLock account.
+
+1. **No URL changes needed:** Do not set `apiUrl` or `wsUrl` locally unless you are running your own self-hosted DevLock server. The SDK will automatically connect to your production DevLock servers.
+2. **Domain Lock:** If you have enabled **Domain Lock** in your DevLock Dashboard for this project, you must explicitly add `localhost` or `127.0.0.1` to the **Allowed Domains** list. If the list is completely empty, it allows all domains by default.
+
 ## Links
 
 - [Website & Dashboard](https://devlock.tashanto.com)

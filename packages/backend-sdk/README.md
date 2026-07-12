@@ -291,6 +291,13 @@ Definitive enforcement signals (kill-switch, API suspension, maintenance, and
 received they persist across restarts, so an outage cannot be used to bypass a lock
 that was already issued.
 
+## Local Development & Testing
+
+When integrating the SDK into a local service (e.g., `http://localhost:3000`), you can test it directly against your production DevLock account.
+
+1. **No URL changes needed:** Do not set `apiUrl` or `wsUrl` locally unless you are running your own self-hosted DevLock server. The SDK will automatically connect to your production DevLock servers.
+2. **Domain Lock:** For backend API endpoints, domain locking usually applies to where the request originates. If you enforce Domain Locking, ensure `localhost` or `127.0.0.1` is added to the **Allowed Domains** in your DevLock Dashboard (or leave the list completely empty to allow all domains).
+
 ## Links
 
 - [Website & Dashboard](https://devlock.tashanto.com)
