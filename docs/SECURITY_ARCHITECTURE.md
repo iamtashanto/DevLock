@@ -389,7 +389,7 @@ const agent = new https.Agent({
 ```html
 <!-- Pin SDK bundle integrity -->
 <script
-  src="https://cdn.devlock.io/sdk/v1.0.0/devlock.min.js"
+  src="https://cdn.devlock.tashanto.com/sdk/v1.0.0/devlock.min.js"
   integrity="sha384-<hash>"
   crossorigin="anonymous"
 ></script>
@@ -856,7 +856,7 @@ Anti-virus software may flag DevLock SDK as malicious because:
 2. Transparent behavior: Document all network calls in README
 3. Minimal obfuscation: Use terser (standard minification), avoid heavy obfuscation
 4. Configurable features: Let developers disable anti-debug, watermark, etc.
-5. Well-known domains: Use devlock.io (not random-looking domains)
+5. Well-known domains: Use devlock.tashanto.com (not random-looking domains)
 6. Standard protocols: HTTPS + WSS (not custom binary protocols)
 7. AV vendor outreach: Submit SDK to major AV vendors for whitelisting
 8. VirusTotal monitoring: Regularly scan releases for false positives
@@ -1009,7 +1009,7 @@ npm audit signatures  // Verify registry signatures
 npm pack --dry-run    // Inspect what gets published
 
 // Subresource Integrity for CDN delivery:
-<script src="https://cdn.devlock.io/sdk/v1.0.0.js"
+<script src="https://cdn.devlock.tashanto.com/sdk/v1.0.0.js"
         integrity="sha384-<hash>"
         crossorigin="anonymous"></script>
 ```

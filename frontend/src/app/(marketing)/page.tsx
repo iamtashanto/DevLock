@@ -1,9 +1,81 @@
 import { HeaderAuth } from '@/components/marketing/header-auth';
 import { PricingSection } from '@/components/marketing/pricing-section';
+import { MobileNav } from '@/components/marketing/mobile-nav';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://devlock.tashanto.com';
+
+const FAQ_ITEMS = [
+  {
+    q: 'What happens if my app loses internet connectivity?',
+    a: 'DevLock includes built-in offline support. License validations are cached locally with a configurable grace period. Your app keeps working normally during connectivity issues and syncs back when the connection is restored. Critically, DevLock going down never locks or breaks your app — errors always fail open.',
+  },
+  {
+    q: 'Can I use DevLock with any programming language?',
+    a: 'DevLock provides official SDKs for JavaScript/TypeScript (Node.js, Express, Fastify, NestJS, React, Next.js, Vue). The REST API can be used with any language. Python, Go, and PHP SDKs are on the roadmap.',
+  },
+  {
+    q: 'How does the kill-switch work?',
+    a: 'When you activate the kill-switch from the dashboard, a WebSocket event is broadcast to all connected instances immediately. Apps using the SDK receive the signal and can gracefully shut down or show a custom message. It typically propagates within milliseconds.',
+  },
+  {
+    q: 'Can I lock a client’s website if they stop paying?',
+    a: 'Yes — that is a core use case. Embed the SDK in your client’s site, then lock it from your dashboard the moment a payment stops (with a custom message), and unlock it instantly once they pay. Locking is fully manual and under your control.',
+  },
+  {
+    q: 'Is DevLock open source?',
+    a: 'Yes. DevLock is fully open source. You can self-host the entire platform or use the managed cloud service. The SDKs, dashboard, and API are available on GitHub under a permissive license.',
+  },
+  {
+    q: 'How does domain locking prevent piracy?',
+    a: 'Domain locking ties a license to specific domains. The SDK checks the current hostname against the allowed list on every validation. If someone copies your code to an unauthorized domain, the license check fails and the app won’t function.',
+  },
+  {
+    q: 'What’s the difference between devlock-client and devlock-sdk?',
+    a: 'devlock-client is for frontend/browser apps — it uses public keys and is safe to bundle. devlock-sdk is for backend/server apps — it uses secret API keys and provides full management capabilities including license validation middleware.',
+  },
+];
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'DevLock',
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
+      sameAs: ['https://github.com/iamtashanto/DevLock'],
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'DevLock',
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Web, Node.js',
+      description:
+        'Software licensing, remote kill-switch, maintenance mode, feature flags and domain locking for developers — control your distributed apps in real time from one dashboard.',
+      url: SITE_URL,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: FAQ_ITEMS.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
+    },
+  ],
+};
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
+      {/* SEO: structured data for rich results (Organization, App, FAQ) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       {/* ─── NAVBAR ─── */}
       <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
@@ -27,7 +99,10 @@ export default function LandingPage() {
               GitHub
             </a>
           </div>
-          <HeaderAuth />
+          <div className="flex items-center gap-2">
+            <HeaderAuth />
+            <MobileNav />
+          </div>
         </nav>
       </header>
 
@@ -597,77 +672,17 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-12 space-y-4">
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  What happens if my app loses internet connectivity?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  DevLock includes built-in offline support. License validations are cached locally with configurable TTL. Your app continues to work normally during connectivity issues, and syncs back when the connection is restored.
-                </p>
-              </details>
-
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  Can I use DevLock with any programming language?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  Currently, DevLock provides official SDKs for JavaScript/TypeScript (Node.js, React, Vue, Angular). The REST API can be used with any language. Python, Go, and PHP SDKs are on our roadmap.
-                </p>
-              </details>
-
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  How does the kill-switch work?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  When you activate the kill-switch from the dashboard, a WebSocket event is broadcast to all connected instances immediately. Apps using the SDK will receive the signal and can gracefully shut down or display a custom message. It typically propagates within 50ms globally.
-                </p>
-              </details>
-
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  Is DevLock open source?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  Yes! DevLock is fully open source. You can self-host the entire platform or use our managed cloud service. The SDKs, dashboard, and API gateway are all available on GitHub under a permissive license.
-                </p>
-              </details>
-
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  How does domain locking prevent piracy?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  Domain locking ties a license to specific domains. The SDK checks the current hostname against the allowed list on every validation. If someone copies your code to an unauthorized domain, the license check fails and the app won&apos;t function.
-                </p>
-              </details>
-
-              <details className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
-                <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-white">
-                  What&apos;s the difference between devlock-client and devlock-sdk?
-                  <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <p className="mt-4 text-sm leading-relaxed text-slate-400">
-                  <strong className="text-slate-200">devlock-client</strong> is for frontend/browser apps — it uses public keys and is safe to bundle. <strong className="text-slate-200">devlock-sdk</strong> is for backend/server apps — it uses secret API keys and provides full management capabilities including license creation and revocation.
-                </p>
-              </details>
+              {FAQ_ITEMS.map((item) => (
+                <details key={item.q} className="group rounded-xl border border-slate-800 bg-slate-900/50 px-6 py-5">
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-white">
+                    {item.q}
+                    <svg className="h-5 w-5 shrink-0 text-slate-500 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <p className="mt-4 text-sm leading-relaxed text-slate-400">{item.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
@@ -777,7 +792,7 @@ export default function LandingPage() {
                 <li><a href="#" className="text-sm text-slate-400 transition hover:text-white">Privacy Policy</a></li>
                 <li><a href="#" className="text-sm text-slate-400 transition hover:text-white">Terms of Service</a></li>
                 <li><a href="#" className="text-sm text-slate-400 transition hover:text-white">License (MIT)</a></li>
-                <li><a href="mailto:support@devlock.io" className="text-sm text-slate-400 transition hover:text-white">Contact</a></li>
+                <li><a href="mailto:support@tashanto.com" className="text-sm text-slate-400 transition hover:text-white">Contact</a></li>
               </ul>
             </div>
           </div>

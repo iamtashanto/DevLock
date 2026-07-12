@@ -35,7 +35,7 @@
 
 ## 1. REST API Structure
 
-### Base URL: `https://api.devlock.io/v1`
+### Base URL: `https://api.devlock.tashanto.com/v1`
 
 ### Authentication
 ```
