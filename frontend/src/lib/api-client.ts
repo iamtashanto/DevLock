@@ -20,7 +20,7 @@ class ApiClient {
 
   constructor() {
     this.baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/v1';
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6000/v1';
   }
 
   private getToken(): string | null {
@@ -35,7 +35,7 @@ class ApiClient {
         const parsed = JSON.parse(stored);
         return parsed?.state?.accessToken || null;
       }
-    } catch {}
+    } catch { }
     return null;
   }
 
