@@ -1,6 +1,6 @@
 {
   "name": "devlock-sdk",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "DevLock Backend SDK for Node.js, Express, Fastify, and NestJS. Protect your APIs with real-time license validation, remote kill-switch, API suspension, and distributed caching features.",
   "author": {
     "name": "Md Tanvir Ahamed Shanto",
