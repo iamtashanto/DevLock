@@ -9,6 +9,7 @@ export interface Project {
   status: 'active' | 'archived';
   apiKey: string;
   secretKey: string;
+  settings?: any;
   totalLicenses: number;
   activeLicenses: number;
   createdAt: string;
@@ -24,6 +25,7 @@ export interface UpdateProjectRequest {
   name?: string;
   description?: string;
   status?: 'active' | 'archived';
+  settings?: any;
 }
 
 export interface ProjectListResponse {
@@ -52,6 +54,7 @@ function mapProject(p: any): Project {
     status: p?.isActive === false ? 'archived' : 'active',
     apiKey: p?.publicKey ?? p?.apiKey ?? '',
     secretKey: p?.secretKey ?? '',
+    settings: p?.settings,
     totalLicenses: p?.totalLicenses ?? 0,
     activeLicenses: p?.activeLicenses ?? 0,
     createdAt: p?.createdAt ?? '',
