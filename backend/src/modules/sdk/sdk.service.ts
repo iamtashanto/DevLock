@@ -57,17 +57,11 @@ export class SDKService {
       return this.invalidResult(projectId, 'License expired', 'expired');
     }
 
-    // Check activation limit
-    const activationCount = license.activations?.length ?? 0;
+    // Register or update activation (device limit check disabled)
     const existingActivation = license.activations?.find(
       (a: any) => a.fingerprint === input.fingerprint,
     );
 
-    if (!existingActivation && activationCount >= license.maxActivations) {
-      return this.invalidResult(projectId, 'Activation limit reached');
-    }
-
-    // Register or update activation
     if (!existingActivation) {
       await LicenseModel.updateOne(
         { _id: license._id },
