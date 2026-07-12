@@ -48,8 +48,8 @@ export function createRoutes(): Router {
         orgId: req.auth!.orgId, 
         name: tenant?.name, 
         plan: tenant?.plan,
-        customDomain: tenant?.customDomain,
-        branding: tenant?.branding
+        customDomain: tenant?.settings?.customDomain,
+        branding: tenant?.settings?.branding
       } });
     } catch (err) {
       next(err);

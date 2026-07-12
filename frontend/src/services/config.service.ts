@@ -7,6 +7,7 @@ export interface RemoteConfig {
   maintenanceMessage?: string;
   killSwitch: boolean;
   killSwitchReason?: string;
+  domainLock?: { enabled: boolean; action: string; domains: string[] };
   notifications: ConfigNotification[];
   customConfig: Record<string, unknown>;
   updatedAt: string;
@@ -25,6 +26,7 @@ function normalizeConfig(raw: any): RemoteConfig {
     maintenanceMessage: raw?.maintenance?.message,
     killSwitch: raw?.killSwitch?.enabled === true,
     killSwitchReason: raw?.killSwitch?.reason,
+    domainLock: raw?.domainLock,
     notifications: Array.isArray(raw?.notifications) ? raw.notifications : [],
     customConfig: raw?.customConfig ?? raw?.customData ?? {},
     updatedAt: raw?.updatedAt ?? '',
@@ -44,6 +46,7 @@ export interface UpdateConfigRequest {
   maintenance?: boolean;
   killSwitch?: boolean;
   killSwitchReason?: string;
+  domainLock?: { enabled: boolean; action: string; domains: string[] };
   customConfig?: Record<string, unknown>;
 }
 
