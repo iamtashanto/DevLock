@@ -71,4 +71,18 @@ export class AuthController {
     await authService.changePassword(req.auth!.sub, req.body.currentPassword, req.body.newPassword);
     res.json({ success: true, data: { message: 'Password changed successfully' } });
   }
+
+  async updateTenantBranding(req: Request, res: Response): Promise<void> {
+    const { TenantModel } = await import('@/database');
+    const tenantId = req.auth!.orgId;
+    const { customDomain, branding } = req.body;
+    
+    const tenant = await TenantModel.findByIdAndUpdate(
+      tenantId,
+      { $set: { customDomain, branding } },
+      { new: true }
+    );
+    
+    res.json({ success: true, data: tenant });
+  }
 }

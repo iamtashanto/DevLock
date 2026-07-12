@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { authService } from '@/services/auth.service';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { apiClient } from '@/lib/api-client';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -14,6 +16,7 @@ import { Avatar } from '@/components/ui/avatar';
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
 
   const [profileSaving, setProfileSaving] = useState(false);
@@ -24,6 +27,23 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwSaving, setPwSaving] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
+  const [customDomain, setCustomDomain] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [primaryColor, setPrimaryColor] = useState('#000000');
+  const [companyName, setCompanyName] = useState('');
+
+  const { data: tenant } = useQuery({
+    queryKey: ['tenant'],
+    queryFn: () => apiClient.get<any>('/organizations'),
+  });
+
+  const updateBrandingMutation = useMutation({
+    mutationFn: (data: any) => apiClient.put('/auth/tenant/branding', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenant'] });
+    },
+  });
 
   const handleUpdateProfile = async () => {
     if (!name.trim()) return;
@@ -183,6 +203,86 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Tenant Branding (Only for Admin/Owner) */}
+      {(user?.role === 'admin' || user?.role === 'owner') && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">White-labeling & Branding</CardTitle>
+            <CardDescription>Customize the appearance of your customer portal</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="custom-domain">Custom Domain</Label>
+              <Input
+                id="custom-domain"
+                placeholder="portal.yourcompany.com"
+                defaultValue={tenant?.customDomain || ''}
+                onChange={(e) => setCustomDomain(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">CNAME record must point to cname.devlock.io</p>
+            </div>
+            <Separator />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="company-name">Company Name</Label>
+                <Input
+                  id="company-name"
+                  placeholder="Acme Corp"
+                  defaultValue={tenant?.branding?.companyName || ''}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="primary-color">Primary Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="primary-color"
+                    type="color"
+                    className="w-12 h-10 p-1 cursor-pointer"
+                    defaultValue={tenant?.branding?.primaryColor || '#000000'}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                  />
+                  <Input
+                    value={primaryColor || tenant?.branding?.primaryColor || '#000000'}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="logo-url">Logo URL</Label>
+              <Input
+                id="logo-url"
+                placeholder="https://example.com/logo.png"
+                defaultValue={tenant?.branding?.logoUrl || ''}
+                onChange={(e) => setLogoUrl(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => {
+                  updateBrandingMutation.mutate({
+                    customDomain: customDomain || tenant?.customDomain,
+                    branding: {
+                      companyName: companyName || tenant?.branding?.companyName,
+                      primaryColor: primaryColor || tenant?.branding?.primaryColor,
+                      logoUrl: logoUrl || tenant?.branding?.logoUrl,
+                    }
+                  });
+                }}
+                loading={updateBrandingMutation.isPending}
+              >
+                Save Branding
+              </Button>
+              {updateBrandingMutation.isSuccess && (
+                <span className="text-sm text-green-600">Saved successfully</span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

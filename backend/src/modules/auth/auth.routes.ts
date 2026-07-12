@@ -38,4 +38,8 @@ router.post('/change-password', authenticate, rateLimiter('auth'), (req, res, ne
   controller.changePassword(req, res).catch(next);
 });
 
+router.put('/tenant/branding', authenticate, (req, res, next) => {
+  controller.updateTenantBranding(req, res).catch(next);
+});
+
 export { router as authRoutes };

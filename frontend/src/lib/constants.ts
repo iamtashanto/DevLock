@@ -7,6 +7,7 @@ import {
   CreditCard,
   Bell,
   BarChart3,
+  ActivitySquare,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -63,9 +64,14 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
   },
   {
     title: 'Analytics',
-    href: '/projects',
+    href: '/projects', // Consider fixing this to point to a real analytics route if one exists
     icon: BarChart3,
     permission: 'analytics:read',
+  },
+  {
+    title: 'Audit Logs',
+    href: '/audit',
+    icon: ActivitySquare,
   },
   {
     title: 'Subscription',
@@ -73,8 +79,6 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
     icon: CreditCard,
   },
 ];
-
-
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
   {
@@ -95,6 +99,7 @@ export const PROJECT_TABS = [
   { title: 'Config', href: '/config' },
   { title: 'Flags', href: '/flags' },
   { title: 'Domains', href: '/domains' },
+  { title: 'Notifications', href: '/notifications' },
   { title: 'Analytics', href: '/analytics' },
   { title: 'Settings', href: '/settings' },
 ] as const;

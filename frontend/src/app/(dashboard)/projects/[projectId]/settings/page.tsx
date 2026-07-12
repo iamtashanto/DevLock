@@ -33,17 +33,28 @@ export default function ProjectSettingsPage() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [tamperLevel, setTamperLevel] = useState('warn');
 
   // Initialize form when project loads
   useEffect(() => {
     if (project) {
       setName(project.name);
       setDescription(project.description || '');
+      setTamperLevel(project.settings?.tamperDetection?.level || 'warn');
     }
   }, [project]);
 
   const updateMutation = useMutation({
-    mutationFn: () => projectService.update(projectId, { name, description }),
+    mutationFn: () => projectService.update(projectId, { 
+      name, 
+      description,
+      settings: {
+        tamperDetection: {
+          enabled: true,
+          level: tamperLevel,
+        }
+      }
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     },
@@ -144,6 +155,39 @@ export default function ProjectSettingsPage() {
               Rotate Keys
             </Button>
           </PermissionGate>
+        </CardContent>
+      </Card>
+
+      {/* Security Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Security Settings</CardTitle>
+          <CardDescription>Configure tamper detection and security enforcement levels</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="tamper-level">Tamper Detection Level</Label>
+            <select
+              id="tamper-level"
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={tamperLevel}
+              onChange={(e) => setTamperLevel(e.target.value)}
+            >
+              <option value="warn">Warn (Only log to audit logs)</option>
+              <option value="degrade">Degrade (Disable premium features)</option>
+              <option value="block">Block (Stop application from running)</option>
+              <option value="report">Report (Send a webhook alert silently)</option>
+            </select>
+            <p className="text-sm text-muted-foreground">
+              This controls how the SDK responds if it detects modifications to its own code or your core logic.
+            </p>
+          </div>
+          <Button
+            onClick={() => updateMutation.mutate()}
+            loading={updateMutation.isPending}
+          >
+            Save Security Settings
+          </Button>
         </CardContent>
       </Card>
 

@@ -35,6 +35,9 @@ export class ConfigController {
     if (updateData.notifications !== undefined) {
       config.notifications = updateData.notifications;
     }
+    if (updateData.domainLock !== undefined) {
+      config.domainLock = updateData.domainLock;
+    }
 
     await config.save();
     res.json({ success: true, data: config });

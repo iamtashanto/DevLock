@@ -13,6 +13,7 @@ export interface UpdateProjectInput {
   name?: string;
   description?: string;
   allowedDomains?: string[];
+  settings?: any;
 }
 
 export class ProjectService {

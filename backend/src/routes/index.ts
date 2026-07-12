@@ -9,6 +9,7 @@ import { billingRoutes } from '../modules/billing/billing.routes.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 import { ConfigController } from '../modules/projects/config.controller.js';
+import { AuditController } from '../modules/audit/audit.controller.js';
 
 export function createRoutes(): Router {
   const router = Router();
@@ -43,7 +44,13 @@ export function createRoutes(): Router {
     try {
       const { TenantModel } = await import('@/database');
       const tenant = await TenantModel.findById(req.auth!.orgId).lean();
-      res.json({ success: true, data: { orgId: req.auth!.orgId, name: tenant?.name, plan: tenant?.plan } });
+      res.json({ success: true, data: { 
+        orgId: req.auth!.orgId, 
+        name: tenant?.name, 
+        plan: tenant?.plan,
+        customDomain: tenant?.customDomain,
+        branding: tenant?.branding
+      } });
     } catch (err) {
       next(err);
     }
@@ -90,8 +97,9 @@ export function createRoutes(): Router {
   });
 
   // Audit Logs
-  router.get('/organizations/:orgId/audit-logs', authenticate, authorize('audit:read'), (_req, res) => {
-    res.json({ success: true, data: [], meta: { total: 0 } });
+  const auditController = new AuditController();
+  router.get('/organizations/:orgId/audit-logs', authenticate, authorize('audit:read'), (req, res, next) => {
+    auditController.list(req, res).catch(next);
   });
 
   // Admin
