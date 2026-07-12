@@ -276,11 +276,15 @@ used to bypass a lock that was already issued.
 ## Links
 
 - [Website & Dashboard](https://devlock.tashanto.com)
+- [Documentation](https://devlock.tashanto.com/docs)
 - [GitHub Repository](https://github.com/iamtashanto/DevLock)
-- [Documentation](https://github.com/iamtashanto/DevLock/tree/main/packages/frontend-sdk)
 - [Backend SDK (devlock-sdk)](https://www.npmjs.com/package/devlock-sdk)
 - [Report Issues](https://github.com/iamtashanto/DevLock/issues)
 
 ## License
 
 MIT
+
+---
+
+Built by [Md Tanvir Ahamed Shanto](https://tashanto.com) · [devlock.tashanto.com](https://devlock.tashanto.com)

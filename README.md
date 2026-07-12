@@ -365,3 +365,12 @@ MIT
 This is an open-source project. Contributions, issues, and feature requests are welcome.
 
 If you find DevLock useful, consider giving it a ⭐ on GitHub.
+
+---
+
+## Credits
+
+Built and maintained by **[Md Tanvir Ahamed Shanto](https://tashanto.com)**.
+
+- Website & Dashboard: [devlock.tashanto.com](https://devlock.tashanto.com)
+- Documentation: [devlock.tashanto.com/docs](https://devlock.tashanto.com/docs)

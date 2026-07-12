@@ -7,6 +7,7 @@ const LINKS = [
   { href: '#features', label: 'Features' },
   { href: '#how-it-works', label: 'How it works' },
   { href: '#pricing', label: 'Pricing' },
+  { href: '/docs', label: 'Docs' },
   { href: '#faq', label: 'FAQ' },
   { href: 'https://github.com/iamtashanto/DevLock', label: 'GitHub', external: true },
 ];

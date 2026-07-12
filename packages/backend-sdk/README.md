@@ -294,11 +294,15 @@ that was already issued.
 ## Links
 
 - [Website & Dashboard](https://devlock.tashanto.com)
+- [Documentation](https://devlock.tashanto.com/docs)
 - [GitHub Repository](https://github.com/iamtashanto/DevLock)
-- [Documentation](https://github.com/iamtashanto/DevLock/tree/main/packages/backend-sdk)
 - [Frontend SDK (devlock-client)](https://www.npmjs.com/package/devlock-client)
 - [Report Issues](https://github.com/iamtashanto/DevLock/issues)
 
 ## License
 
 MIT
+
+---
+
+Built by [Md Tanvir Ahamed Shanto](https://tashanto.com) · [devlock.tashanto.com](https://devlock.tashanto.com)

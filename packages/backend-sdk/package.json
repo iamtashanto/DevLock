@@ -2,7 +2,10 @@
   "name": "devlock-sdk",
   "version": "1.0.4",
   "description": "DevLock Backend SDK for Node.js, Express, Fastify, and NestJS. Protect your APIs with real-time license validation, remote kill-switch, API suspension, and distributed caching features.",
-  "author": "DevLock",
+  "author": {
+    "name": "Md Tanvir Ahamed Shanto",
+    "url": "https://tashanto.com"
+  },
   "license": "MIT",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -96,8 +99,14 @@
   "devlock": {
     "website": "https://devlock.tashanto.com",
     "dashboard": "https://devlock.tashanto.com/dashboard",
-    "docs": "https://github.com/iamtashanto/DevLock/tree/main/packages/backend-sdk",
+    "docs": "https://devlock.tashanto.com/docs",
     "frontendSdk": "https://www.npmjs.com/package/devlock-client"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "sideEffects": false
 }
