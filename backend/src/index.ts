@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { createServer } from 'http';
 import { createLogger } from '@/logger';
-import { connectMongo } from '@/database';
+import { connectMongo, autoSeed } from '@/database';
 import { requestId } from './middleware/request-id.js';
 import { rateLimiter } from './middleware/rate-limiter.js';
 import { errorHandler } from './middleware/error-handler.js';
@@ -80,6 +80,9 @@ async function bootstrap(): Promise<void> {
     // Connect to MongoDB
     await connectMongo();
     logger.info('MongoDB connected');
+
+    // Run auto-seeding
+    await autoSeed();
 
     // Start HTTP server
     const server = createServer(app);

@@ -177,13 +177,22 @@ export default function SubscriptionPage() {
             <div className="rounded-lg border bg-card p-4 space-y-3 shadow-sm">
               <h3 className="font-semibold flex items-center gap-2">
                 <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">₿</div>
-                Crypto Payment (USDT/TRC20)
+                Crypto Payment
               </h3>
               <p className="text-sm text-muted-foreground">
-                Send exactly <strong>{selectedPlan?.price} USDT</strong> to the following address:
+                crypto payment and if any payment issue contact me in telegram username iamtashanto no mfs<br/><br/>
+                Send exactly <strong>{selectedPlan?.price} USDT</strong> to any of the following addresses:
               </p>
-              <div className="rounded-md bg-muted p-3 text-center text-sm font-mono break-all text-primary">
-                [Your Crypto Wallet Address Here]
+              <div className="space-y-2">
+                <div className="rounded-md bg-muted p-2 text-xs font-mono break-all text-primary">
+                  <span className="font-bold text-foreground">BNB Smart Chain (BEP20):</span> 0x93914041a81239151754b628176ea23bbf7c444d
+                </div>
+                <div className="rounded-md bg-muted p-2 text-xs font-mono break-all text-primary">
+                  <span className="font-bold text-foreground">TRC20:</span> TFrDkWeetzcYidgVE4LCd6Cg41qa1X4WJ5
+                </div>
+                <div className="rounded-md bg-muted p-2 text-xs font-mono break-all text-primary">
+                  <span className="font-bold text-foreground">ERC20:</span> 0x93914041a81239151754b628176ea23bbf7c444d
+                </div>
               </div>
             </div>
 
