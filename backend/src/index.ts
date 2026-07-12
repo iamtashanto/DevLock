@@ -13,7 +13,7 @@ import { createRoutes } from './routes/index.js';
 import { NotFoundError } from './core/errors/index.js';
 
 const logger = createLogger({ service: 'api-gateway' });
-const PORT = Number(process.env['PORT'] ?? 3000);
+const PORT = Number(process.env['PORT'] ?? 6000);
 
 // ── Create Express App ────────────────────────────────────────────────────────
 

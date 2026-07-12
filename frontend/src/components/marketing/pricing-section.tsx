@@ -7,8 +7,9 @@ interface Plan {
   _id: string;
   name: string;
   maxProjects: number;
-  monthlyPrice: number;
+  price: number;
   features: string[];
+  isPopular?: boolean;
 }
 
 export function PricingSection() {
@@ -40,7 +41,7 @@ export function PricingSection() {
   return (
     <div className="mt-16 grid gap-8 lg:grid-cols-3">
       {plans.map((plan) => {
-        const isPopular = plan.monthlyPrice > 0;
+        const isPopular = plan.isPopular;
         return (
           <div
             key={plan._id}
@@ -58,7 +59,7 @@ export function PricingSection() {
             <h3 className="text-lg font-semibold text-white uppercase">{plan.name}</h3>
             <p className="mt-2 text-sm text-slate-400">Up to {plan.maxProjects} projects.</p>
             <div className="mt-6">
-              <span className="text-4xl font-bold text-white">${plan.monthlyPrice}</span>
+              <span className="text-4xl font-bold text-white">${plan.price}</span>
               <span className="text-slate-500">/month</span>
             </div>
             <ul className="mt-8 space-y-3">

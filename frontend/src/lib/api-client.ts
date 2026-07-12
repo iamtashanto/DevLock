@@ -20,7 +20,7 @@ class ApiClient {
 
   constructor() {
     this.baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6002/v1';
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6000/v1';
   }
 
   private getToken(): string | null {
