@@ -54,15 +54,29 @@ export async function sdkAuth(req: Request, _res: Response, next: NextFunction):
   }
 
   // Verify HMAC signature
+  // Frontend SDK signs with publicKey, backend SDK signs with secretKey.
+  // Try frontend (publicKey) first, fall back to backend (secretKey).
   const payload = timestamp + JSON.stringify(req.body ?? {});
-  const expectedSignature = createHmac('sha256', project.secretKey)
+
+  const expectedFrontend = createHmac('sha256', project.publicKey)
+    .update(payload)
+    .digest('hex');
+
+  const expectedBackend = createHmac('sha256', project.secretKey)
     .update(payload)
     .digest('hex');
 
   const sigBuffer = Buffer.from(signature, 'hex');
-  const expectedBuffer = Buffer.from(expectedSignature, 'hex');
 
-  if (sigBuffer.length !== expectedBuffer.length || !timingSafeEqual(sigBuffer, expectedBuffer)) {
+  const matchFrontend =
+    sigBuffer.length === Buffer.from(expectedFrontend, 'hex').length &&
+    timingSafeEqual(sigBuffer, Buffer.from(expectedFrontend, 'hex'));
+
+  const matchBackend =
+    sigBuffer.length === Buffer.from(expectedBackend, 'hex').length &&
+    timingSafeEqual(sigBuffer, Buffer.from(expectedBackend, 'hex'));
+
+  if (!matchFrontend && !matchBackend) {
     throw new AuthenticationError('Invalid request signature');
   }
 
