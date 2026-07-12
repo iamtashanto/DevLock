@@ -18,7 +18,7 @@ export default function DashboardPage() {
       title: 'Total Projects',
       value: stats?.totalProjects ?? 0,
       icon: FolderKanban,
-      description: 'Active projects in your organization',
+      description: stats?.maxProjects ? `${stats.totalProjects} / ${stats.maxProjects} projects used` : 'Active projects in your organization',
     },
     {
       title: 'Total Licenses',

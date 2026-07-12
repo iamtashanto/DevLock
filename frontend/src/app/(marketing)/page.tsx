@@ -18,6 +18,10 @@ const FAQ_ITEMS = [
     a: 'When you activate the kill-switch from the dashboard, a WebSocket event is broadcast to all connected instances immediately. Apps using the SDK receive the signal and can gracefully shut down or show a custom message. It typically propagates within milliseconds.',
   },
   {
+    q: 'What do the different fields in "Create License" do?',
+    a: 'DevLock lets you customize licenses extensively. "Customer Name & Email" identify the licensee. "Type" (Free/Pro/Enterprise) can be checked in code to toggle premium features. "Max Devices" prevents a single license from being shared by limiting hardware fingerprints. "Expiry" sets a hard date after which the license automatically becomes invalid. All fields are fully functional and strictly enforced by the API.',
+  },
+  {
     q: 'Can I lock a client’s website if they stop paying?',
     a: 'Yes — that is a core use case. Embed the SDK in your client’s site, then lock it from your dashboard the moment a payment stops (with a custom message), and unlock it instantly once they pay. Locking is fully manual and under your control.',
   },

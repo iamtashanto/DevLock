@@ -42,6 +42,7 @@ interface DashboardStats {
 
 export default function SuperAdminPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentHistory, setPaymentHistory] = useState<Payment[]>([]);
   const [sysStatus, setSysStatus] = useState<SystemStatus | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,11 +52,13 @@ export default function SuperAdminPage() {
     try {
       setLoading(true);
       const [paymentsData, statusData, statsData] = await Promise.all([
-        apiClient.get<Payment[]>('/admin/payments?status=pending'),
+        apiClient.get<Payment[]>('/admin/payments'),
         apiClient.get<SystemStatus>('/admin/status'),
         apiClient.get<DashboardStats>('/admin/stats')
       ]);
-      setPayments(paymentsData || []);
+      const allPayments = paymentsData || [];
+      setPayments(allPayments.filter(p => p.status === 'pending'));
+      setPaymentHistory(allPayments.filter(p => p.status !== 'pending'));
       setSysStatus(statusData);
       setStats(statsData);
     } catch (err: any) {
@@ -329,6 +332,69 @@ export default function SuperAdminPage() {
                         <XCircle className="w-4 h-4" />
                         Reject
                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Payment History Table */}
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900">Payment History</h2>
+          <p className="text-sm text-gray-500 mt-1">Past approved or rejected payments.</p>
+        </div>
+        
+        {paymentHistory.length === 0 ? (
+          <div className="p-12 text-center text-gray-500">
+            <p className="text-sm mt-1">No payment history available.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-gray-600">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 font-medium tracking-wider">User & Tenant</th>
+                  <th className="px-6 py-4 font-medium tracking-wider">Method & TrxID</th>
+                  <th className="px-6 py-4 font-medium tracking-wider">Plan & Amount</th>
+                  <th className="px-6 py-4 font-medium tracking-wider">Date</th>
+                  <th className="px-6 py-4 text-right font-medium tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paymentHistory.map(payment => (
+                  <tr key={payment._id} className="hover:bg-gray-50/80 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="text-gray-900 font-semibold">{payment.userId?.name}</div>
+                      <div className="text-xs text-indigo-600 font-medium">{payment.tenantId?.name}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-700 capitalize mb-1 border border-gray-200">
+                        {payment.method}
+                      </span>
+                      <div className="text-xs font-mono bg-gray-50 text-gray-600 p-1.5 rounded border border-gray-200">{payment.transactionId}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-gray-900 capitalize font-bold">{payment.planId}</div>
+                      <div className="text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-0.5 rounded-full mt-1 border border-emerald-100">
+                        {payment.amount} {payment.currency}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 font-medium">
+                      {new Date(payment.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      })}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                        payment.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {payment.status}
+                      </span>
                     </td>
                   </tr>
                 ))}

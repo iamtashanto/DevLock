@@ -1,7 +1,8 @@
 import { apiClient } from '@/lib/api-client';
 
-export interface OverviewStats {
+export interface AnalyticsOverview {
   totalProjects: number;
+  maxProjects?: number;
   totalLicenses: number;
   activeLicenses: number;
   expiredLicenses: number;
@@ -38,8 +39,8 @@ export interface ProjectAnalytics {
 }
 
 export const analyticsService = {
-  getOverview(): Promise<OverviewStats> {
-    return apiClient.get<OverviewStats>('/analytics/overview');
+  getOverview(): Promise<AnalyticsOverview> {
+    return apiClient.get<AnalyticsOverview>('/analytics/overview');
   },
 
   getLicenseStats(params?: { projectId?: string }): Promise<LicenseStats> {

@@ -86,7 +86,7 @@ export function PricingSection() {
                   : 'border border-slate-700 bg-slate-800 text-white hover:bg-slate-700'
               }`}
             >
-              {isPopular ? 'Start Trial' : 'Get Started'}
+              {plan.price === 0 ? 'Start Free Trial' : 'Get Started'}
             </a>
           </div>
         );

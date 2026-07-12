@@ -1,9 +1,16 @@
-import { ProjectModel, LicenseModel } from '@/database';
+import { ProjectModel, LicenseModel, TenantModel, PlanModel } from '@/database';
 import mongoose from 'mongoose';
 
 export class AnalyticsService {
   async getOverview(orgId: string) {
     const totalProjects = await ProjectModel.countDocuments({ tenantId: orgId });
+    
+    let maxProjects = 5;
+    const tenant = await TenantModel.findById(orgId).lean();
+    if (tenant) {
+      const plan = await PlanModel.findOne({ key: tenant.plan }).lean();
+      if (plan) maxProjects = plan.maxProjects;
+    }
     
     // Aggregation for licenses
     const licenseStats = await LicenseModel.aggregate([
@@ -40,6 +47,7 @@ export class AnalyticsService {
     // For now, returning 0 as a placeholder since validations are just a counter on the license.
     return {
       totalProjects,
+      maxProjects,
       totalLicenses: stats.totalLicenses,
       activeLicenses: stats.activeLicenses,
       expiredLicenses: stats.expiredLicenses,

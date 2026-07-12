@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -13,9 +14,10 @@ import { createRoutes } from './routes/index.js';
 import { NotFoundError } from './core/errors/index.js';
 
 const logger = createLogger({ service: 'api-gateway' });
-const PORT = Number(process.env['PORT'] ?? 6000);
+// Force 6002 instead of 6000 to avoid Chrome ERR_UNSAFE_PORT block
+let PORT = Number(process.env['PORT'] || 6002);
+if (PORT === 6000) PORT = 6002;
 
-// ── Create Express App ────────────────────────────────────────────────────────
 
 const app: express.Express = express();
 

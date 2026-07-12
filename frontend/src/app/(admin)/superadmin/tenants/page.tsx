@@ -11,6 +11,8 @@ interface Tenant {
   plan: string;
   owner: { _id: string; name: string; email: string };
   createdAt: string;
+  projectCount?: number;
+  maxProjects?: number;
 }
 
 interface Plan {
@@ -66,6 +68,7 @@ export default function SuperAdminTenantsPage() {
       alert(err.message || 'Failed to update plan');
     } finally {
       setUpdating(false);
+      fetchData(); // Refresh to get updated project limit
     }
   };
 
@@ -135,6 +138,7 @@ export default function SuperAdminTenantsPage() {
                     <td className="px-6 py-4">
                       <div className="font-semibold text-gray-900">{tenant.name}</div>
                       <div className="text-xs text-indigo-600 font-medium">/{tenant.slug}</div>
+                      <div className="text-xs text-gray-500 mt-1">{tenant.projectCount ?? 0} / {tenant.maxProjects ?? 5} Projects</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-gray-900 font-medium">{tenant.owner?.name || 'Unknown'}</div>

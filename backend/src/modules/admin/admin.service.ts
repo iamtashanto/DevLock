@@ -80,10 +80,24 @@ export class AdminService {
   }
 
   async listTenants() {
-    return TenantModel.find()
+    const tenants = await TenantModel.find()
       .populate('owner', 'name email')
       .sort({ createdAt: -1 })
       .lean();
+
+    const { PlanModel } = await import('@/database');
+    const plans = await PlanModel.find().lean();
+    const planMap = new Map(plans.map(p => [p.key, p.maxProjects]));
+
+    const tenantsWithUsage = await Promise.all(
+      tenants.map(async (tenant) => {
+        const projectCount = await ProjectModel.countDocuments({ tenantId: tenant._id });
+        const maxProjects = planMap.get(tenant.plan) ?? 5;
+        return { ...tenant, projectCount, maxProjects };
+      })
+    );
+
+    return tenantsWithUsage;
   }
 
   async updateTenantPlan(tenantId: string, plan: string) {
